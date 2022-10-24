@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "../lib/ERC721A/contracts/ERC721A.sol";
+import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
 contract Lyra is ERC721A {
     constructor() ERC721A("LYRA", "LYRA") {}
