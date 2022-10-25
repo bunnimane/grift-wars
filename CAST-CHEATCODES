@@ -27,7 +27,7 @@ forge create --rpc-url https://goerli.infura.io/v3/1f3a2b3b6eaf41c495878c23fa822
 
 VERIFY ON GOERLI IF ABOVE FAILED:
 
-forge verify-contract --chain-id 5 --num-of-optimizations 1000000 --watch  --compiler-version <the_contract_address> src/Lyra.sol:Lyra BUVEKM57IBHU931F3NRQ7R5Z2R55AGMESG
+forge verify-contract --chain-id 5 --watch  --compiler-version v0.8.17+commit.8df45f5f <contract addy>  src/Lyra.sol:Lyra BUVEKM57IBHU931F3NRQ7R5Z2R55AGMESG
 
 MINT GOERLI:
 
