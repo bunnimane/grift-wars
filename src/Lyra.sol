@@ -39,7 +39,8 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
      */
 
     function withdraw(uint256 amount) public onlyOwner {
-        require(amount <= address(this).balance, "Insufficient Funds");
-        payable(msg.sender).transfer(amount);
+        require(amount <= address(this).balance, "Insufficient Balance");
+        address _owner = owner();
+        payable(_owner).transfer(amount);
     }
 }
