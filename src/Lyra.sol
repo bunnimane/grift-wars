@@ -2,9 +2,10 @@
 pragma solidity ^0.8.13;
 
 import "../lib/ERC721A/contracts/ERC721A.sol";
+import "../lib/ERC721A/contracts/extensions/ERC721AQueryable.sol";
 import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 
-contract Lyra is ERC721A, Ownable {
+contract Lyra is ERC721A, Ownable, ERC721AQueryable {
     uint256 public Price = 0.001 ether;
     string private baseURI =
         "https://lyraweb.ngrok.io/creature_tokens/chain/goerli/";

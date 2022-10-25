@@ -1,0 +1,19 @@
+
+START ANVIL:
+anvil --chain-id 6969
+
+DEPLOY TO ANVIL:
+forge create --private-key=4d338b445d9147c3eb7c7ca971e392d4582c480e02802e099f61359e19e1bbb6 src/Lyra.sol:Lyra
+
+MINT: 
+cast send <contract>  "mint(uint256)" 3 --rpc-url http://127.0.0.1:8545 --private-key 4d338b445d9147c3eb7c7ca971e392d4582c480e02802e099f61359e19e1bbb6 --value 0.003ether
+
+
+TOKEN URI:
+
+cast call <contract>  "tokenURI(uint256)(string)" 1 --rpc-url http://127.0.0.1:8545
+
+TOKENS OF OWNER: 
+
+cast call <contract>  "tokensOfOwner(address)(uint256[])" 0xc309BDa59ac46c892C4def6F12bF394e58755351  --rpc-url http://127.0.0.1:8545
+
