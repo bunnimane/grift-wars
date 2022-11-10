@@ -1,20 +1,29 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.12;
 
-import "../lib/ERC721A/contracts/ERC721A.sol";
-import "../lib/ERC721A/contracts/extensions/ERC721AQueryable.sol";
-import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+import "@ERC721A/ERC721A.sol";
+import "@ERC721A/extensions/ERC721AQueryable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Lyra is ERC721A, Ownable, ERC721AQueryable {
-    uint256 public Price = 0.001 ether;
+    // Placeholder price
+    uint256 public price = 0.001 ether;
+
     string private baseURI =
         "https://lyraweb.ngrok.io/creature_tokens/chain/goerli/";
+
     uint64 public immutable _maxSupply = 333;
 
-    constructor() ERC721A("LYRA", "LYRA") {}
+    constructor(uint256 _price) ERC721A("LYRA", "LYRA") {
+        price = _price;
+    }
+
+    /*///////////////////////////////////
+                    Mint
+    //////////////////////////////////*/
 
     function mint(uint256 quantity) external payable {
-        require(msg.value == Price * quantity, "The price is invalid");
+        require(msg.value == price * quantity, "The price is invalid");
         require(
             totalSupply() + quantity <= _maxSupply,
             "Maximum supply exceeded"
@@ -22,10 +31,11 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
         _mint(msg.sender, quantity);
     }
 
-    /**
-     * Below is the base URI stuff, it will point to the lyra server, which will
-     * be a proxy for more permanent storage solutions such as IPFS.
-     */
+    /*/////////////////////////////////////////////////////////////////////////////
+        Below is the base URI stuff, it will point to the lyra server, which will
+        be a proxy for more permanent storage solutions such as IPFS.
+    /////////////////////////////////////////////////////////////////////////////*/
+
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
@@ -34,13 +44,19 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
         baseURI = _baseUri;
     }
 
-    /**
-     * Withdraw function to get ether out of the contract
-     */
+    /*///////////////////////////////////////////////////////////
+        Withdraw function to get ether out of the contract
+    ///////////////////////////////////////////////////////////*/
 
-    function withdraw(uint256 amount) public onlyOwner {
-        require(amount <= address(this).balance, "Insufficient Balance");
-        address _owner = owner();
-        payable(_owner).transfer(amount);
+    function withdraw() public payable onlyOwner {
+        (bool success, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(success);
+    }
+
+    function withdrawAny(uint256 _amount) public payable onlyOwner {
+        (bool success, ) = payable(msg.sender).call{value: _amount}("");
+        require(success);
     }
 }
