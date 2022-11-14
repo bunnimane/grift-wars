@@ -48,15 +48,28 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
         Withdraw function to get ether out of the contract
     ///////////////////////////////////////////////////////////*/
 
-    function withdraw() public payable onlyOwner {
-        (bool success, ) = payable(msg.sender).call{
-            value: address(this).balance
-        }("");
-        require(success);
+    function withdraw() external onlyOwner {
+        require(address(this).balance > 0, "Nothing to release");
+        (bool success, ) = payable(owner()).call{value: address(this).balance}(
+            ""
+        );
+        require(success, "withdraw failed");
     }
 
     function withdrawAny(uint256 _amount) public payable onlyOwner {
         (bool success, ) = payable(msg.sender).call{value: _amount}("");
         require(success);
+    }
+
+    /*///////////////////////////////////////////////////////////
+        Price
+    ///////////////////////////////////////////////////////////*/
+
+    function getPrice() public view returns (uint256) {
+        return price;
+    }
+
+    function changePrice(uint256 _price) public onlyOwner {
+        price = _price;
     }
 }
