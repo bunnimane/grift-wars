@@ -2,21 +2,19 @@
 pragma solidity ^0.8.12;
 
 import "@ERC721A/ERC721A.sol";
-import "@ERC721A/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Lyra is ERC721A, Ownable, ERC721AQueryable {
+contract Dloot is ERC721A, Ownable {
     // Placeholder price
-    uint256 public price = 0.001 ether;
+    uint256 public price = 0.004 ether;
+    uint256 public maxPerMint = 10;
 
     string private baseURI =
-        "https://lyraweb.ngrok.io/creature_tokens/chain/goerli/";
+        "ipfs://bafybeidmlj2esp4p2steb2xwq3tszzf5bggfs7tnrs45rnfnn6rues647q/";
 
-    uint64 public immutable _maxSupply = 333;
+    uint64 public immutable _maxSupply = 2222;
 
-    constructor(uint256 _price) ERC721A("LYRA", "LYRA") {
-        price = _price;
-    }
+    constructor() ERC721A("FTX Dumped Loot", "DLOOT") {}
 
     /*///////////////////////////////////
                     Mint
@@ -24,6 +22,16 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
 
     function mint(uint256 quantity) external payable {
         require(msg.value == price * quantity, "The price is invalid");
+        require(quantity <= maxPerMint, "Too Many Minted");
+        require(
+            totalSupply() + quantity <= _maxSupply,
+            "Maximum supply exceeded"
+        );
+        _mint(msg.sender, quantity);
+    }
+
+    function ownerMint(uint256 quantity) external payable onlyOwner {
+        require(quantity <= maxPerMint * 5, "The price is invalid");
         require(
             totalSupply() + quantity <= _maxSupply,
             "Maximum supply exceeded"
@@ -56,11 +64,6 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
         require(success, "withdraw failed");
     }
 
-    function withdrawAny(uint256 _amount) public payable onlyOwner {
-        (bool success, ) = payable(msg.sender).call{value: _amount}("");
-        require(success);
-    }
-
     /*///////////////////////////////////////////////////////////
         Price
     ///////////////////////////////////////////////////////////*/
@@ -71,5 +74,18 @@ contract Lyra is ERC721A, Ownable, ERC721AQueryable {
 
     function changePrice(uint256 _price) public onlyOwner {
         price = _price;
+    }
+
+    /*///////////////////////////////////////////////////////////
+        Token URI
+    ///////////////////////////////////////////////////////////*/
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        return string(abi.encodePacked(super.tokenURI(_tokenId), ".json"));
     }
 }
