@@ -6,15 +6,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Dloot is ERC721A, Ownable {
     // Placeholder price
-    uint256 public price = 0.004 ether;
+    uint256 public price = 0.003 ether;
     uint256 public maxPerMint = 10;
 
     string private baseURI =
-        "ipfs://bafybeidmlj2esp4p2steb2xwq3tszzf5bggfs7tnrs45rnfnn6rues647q/";
+        "ipfs://bafybeifcca6qpeiups6gzqalh6etwpq6h5y3cakrv7s6zxr2mz3aderjdi/";
 
-    uint64 public immutable _maxSupply = 2222;
+    uint64 public immutable _maxSupply = 155;
 
-    constructor() ERC721A("FTX Dumped Loot", "DLOOT") {}
+    constructor() ERC721A("AI FEETSIES", "FEETAI") {}
 
     /*///////////////////////////////////
                     Mint

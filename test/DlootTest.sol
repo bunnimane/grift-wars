@@ -22,7 +22,7 @@ contract LyraTest is Test {
 
     function setUp() public {
         owner = address(this);
-        price = 0.004 ether;
+        price = 0.003 ether;
         dloot = new Dloot();
         vm.deal(dloot.owner(), 10 ether);
         string
@@ -50,10 +50,10 @@ contract LyraTest is Test {
 
     function testMintOverflow() public {
         uint256 quantity = 10;
-        for (uint256 i = 0; i < 222; i++) {
+        for (uint256 i = 0; i < 15; i++) {
             dloot.mint{value: price * quantity}(quantity);
         }
-        assertEq(dloot.totalSupply(), 2220);
+        assertEq(dloot.totalSupply(), 150);
         vm.expectRevert("Maximum supply exceeded");
         dloot.mint{value: price * 10}(10);
     }
@@ -78,10 +78,10 @@ contract LyraTest is Test {
 
     function testOwnerMintOverflow() public {
         uint256 quantity = 10;
-        for (uint256 i = 0; i < 222; i++) {
+        for (uint256 i = 0; i < 15; i++) {
             dloot.ownerMint{value: 0}(quantity);
         }
-        assertEq(dloot.totalSupply(), 2220);
+        assertEq(dloot.totalSupply(), 150);
         vm.expectRevert("Maximum supply exceeded");
         dloot.ownerMint{value: 0}(10);
     }
@@ -137,7 +137,7 @@ contract LyraTest is Test {
         string memory uri = dloot.tokenURI(2);
         assertEq(
             uri,
-            "ipfs://bafybeidmlj2esp4p2steb2xwq3tszzf5bggfs7tnrs45rnfnn6rues647q/2.json"
+            "ipfs://bafybeifcca6qpeiups6gzqalh6etwpq6h5y3cakrv7s6zxr2mz3aderjdi/2.json"
         );
     }
 }
