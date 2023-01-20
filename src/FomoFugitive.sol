@@ -50,7 +50,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
       the VOTING POOL amongst themselves.
 
     *************************************************
-    *             ⚠️⚠️IMPORTANT⚠️⚠️️                *
+    *             ! !  IMPORTANT ! !                *
     *************************************************
     ** IF TWO OR MORE FACTIONS ARE TIED FOR VOTES  **
     **       THE GAME IS EXTENDED BY 2 DAYS        **    
@@ -59,7 +59,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     ℹ️ - For a player who wants to vote every round,
           this will cost UP TO (0.045Ξ + 0.005Ξ)
                         = 0.05Ξ
-
 
     /// -------------------------------------
     /// ✔️ VOTING POOL
@@ -72,7 +71,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
     THEORETICAL VOTING POOL:
 
-    9                   
+     9                   
     ___           
     ╲     
     ╱    0.005*(10000-1000*n) ~= 275Ξ
@@ -85,7 +84,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
     = 275Ξ * 0.67 = 184.25Ξ
 
-    ⚠️ TOTAL MAX POSSIBLE PRIZE POOL IS AROUND 184.25Ξ ⚠️
+    ! TOTAL MAX POSSIBLE PRIZE POOL IS AROUND 184.25Ξ !
 
     ℹ️ - This means each remaining fugitive could be worth
         around ~0.184Ξ. This would make it about a ~3x 
