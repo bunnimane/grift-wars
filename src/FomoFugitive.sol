@@ -9,13 +9,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀ ⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣠⣾⣿⣿⣷⣄⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿⣿⣿⣿⣿⣿⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
-    ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿🦹⣿🦹⣿⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
+    ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿⣿⣿⣿⣿⣿ ⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿⣿⣿⣿⣿⣿⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⢿⣿⣿⣿⣿⡿⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⠀⣙⣛⣛⣋⠀⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⠸⠿⠀⣿⣿⣿⣿⣿⣿ ⠿⠇⠀⠀⠀⠀⠀ ⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⢠⣶⡖⠂⠈⢻⣿⣿⡿⠁⠐⢲⣶⡄⠀⠀⠀⠀⣿⣿⠀
-    ⠀⣿⣿⠀⠀⠀⠀⠀⣿👮⡟⠛⠃⢸⣿⣿⡇⠘⠛⢻👮⣿⠀⠀⣿⣿⠀
+    ⠀⣿⣿⠀⠀⠀⠀⠀⣿⣿⡟⠛⠃⢸⣿⣿⡇⠘⠛⢻⣿⣿⠀⠀   ⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⢀⠘⢿⣿⠟⢁⣼⣿⣿⣷⡀⠻⣿⡿⠃⡀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⣸⡇⢠⣤⠀⣿⣿⣿⣿⣿⣿⠀⣤⡄⢸⣇⠀⠀⠀ ⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⣿⡇⢸⣿⠀⣿⣿⣿⣿⣿⣿⠀⣿⡇⢸⣿⠀⠀⠀⠀⣿⣿⠀
@@ -29,12 +29,14 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     /// 🪙 MINTING 
     /// -------------------------------------
 
-    0.006Ξ mint
-        - first 2000 mints are 0.003Ξ
-        - last 2000 mints are 0.009Ξ
+
+    - 0.006Ξ~ avg mint
+        - first  2000 mints are FRΞΞ
+        - middle 6000 mints are 0.006Ξ
+        - last   2000 mints are 0.012Ξ
         - max 10 per tx
 
-    **GAME STARTS WHEN MINTED OUT**
+    **GAME BEGINS WHEN MINTED OUT**
 
     /// -------------------------------------
     /// 🎮 GAME MECHANICS 
@@ -43,7 +45,18 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     • Every 2 days there is a vote to kill
       off one of the factions. 🔫
 
-    • Each vote costs 0.005Ξ.
+    • Each fugitive is eligible to lock in 1
+      vote.
+
+    • Each vote costs 0.006Ξ + 0.001Ξ * round.
+
+    *************************************************
+    *             ! !  IMPORTANT ! !                *
+    *************************************************
+    ** IF A FUGITIVE IS TRADED AFTER IT HAS VOTED  **
+    **  IT'S VOTE WILL BE RESET AND THE NEW OWNER  **
+    **      WILL BE ABLE TO PLACE A NEW VOTE       **    
+    *************************************************
 
     • AFTER 18 days (IF NO TIES), there will be 
       one faction left. They will be able to split 
@@ -57,8 +70,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
     *************************************************
 
     ℹ️ - For a player who wants to vote every round,
-          this will cost UP TO (0.045Ξ + 0.005Ξ)
-                        = 0.05Ξ
+          this will cost UP TO (0.069Ξ + 0.006Ξ)
+                = 0.075Ξ per fugitive
 
     /// -------------------------------------
     /// ✔️ VOTING POOL
@@ -74,29 +87,30 @@ import "@openzeppelin/contracts/access/Ownable.sol";
      9                   
     ___           
     ╲     
-    ╱    0.005*(10000-1000*n) ~= 275Ξ
+    ╱   (0.006 + 0.0002*n)*(10000-1000*n) ~= 363Ξ
     ‾‾‾        
     i = 0                 
 
     OR
 
-    sum(0.005*(10000-1000*n)) where n=0 to 9 ~= 275Ξ
+    sum(0.006*(10000-1000*n)) where n=0 to 9 ~= 363Ξ
 
-    = 275Ξ * 0.67 = 184.25Ξ
+    = 364Ξ * 0.67 ~= 243Ξ
 
-    ! TOTAL MAX POSSIBLE PRIZE POOL IS AROUND 184.25Ξ !
+    ! TOTAL MAX POSSIBLE PRIZE POOL IS AROUND 243Ξ !
 
     ℹ️ - This means each remaining fugitive could be worth
-        around ~0.184Ξ. This would make it about a ~3x 
-        from a 0.05 cost to fully play or a ~30x from player 
-        who just mints.
+        around ~0.224Ξ. This would make it about a ~3x 
+        from a 0.075 cost to fully play or a ~30x from player 
+        who just mints at avg cost.
 
 */
 
 contract FomoFugitive is ERC721A, Ownable {
-    uint64 public immutable _maxSupply = 777;
-    uint256 public price = 0.007 ether;
-    uint256 public maxPerMint = 7;
+    uint64 public immutable _maxSupply = 10000;
+    uint256 public price = 0.006 ether;
+    uint256 public maxPerMint = 10;
+    bool public mintOpened = false;
 
     // image ipfs: ipfs://bafybeig44calwgq463zey2xycojswdxnm4efjgi7mckfr4vkstfy7oazoe/
     // json ipfs: ipfs://bafybeic3zfaptjliooe75ahpgjudssskm5p4tzpcwd3pozegvo2s7myfp4
@@ -104,47 +118,64 @@ contract FomoFugitive is ERC721A, Ownable {
     string private baseURI =
         "ipfs://bafybeic3zfaptjliooe75ahpgjudssskm5p4tzpcwd3pozegvo2s7myfp4/";
 
-    constructor() ERC721A("FOMO FUGITIVES", unicode"FOMO 🦹") {}
+    constructor() ERC721A("FOMO FUGITIVES", "FUGI") {}
 
-    /*///////////////////////////////////
-                    Mint
-    //////////////////////////////////*/
+    /// -------------------------------------
+    /// 🪙 MINTING
+    /// -------------------------------------
+    // - 0.006Ξ~ avg mint
+    //     - first  2000 mints are FRΞΞ
+    //     - middle 6000 mints are 0.006Ξ
+    //     - last   2000 mints are 0.012Ξ
+    //     - max 10 per tx
+    //
+    // ℹ️ - Be aware that some minters could
+    //     could get fugitives at the prev
+    //     tier price, if they are mitning
+    //     over the boundries. Consider
+    //     this an intended gift should it
+    //     occur.
 
     function mint(uint256 quantity) external payable {
-        require(msg.value == price * quantity, "The price is invalid");
+        // MINT MUST BE OPENED
+        require(mintOpened == true, "THE MINT IS NOT LIVE");
+
+        // SUPPLY BASED TIERS see ℹ️
+        if (totalSupply() <= 1999) {
+            // no require here, it's FRΞΞ!
+        } else if (totalSupply() > 1999) {
+            require(msg.value == price * quantity, "The price is invalid");
+        } else if (totalSupply() > 7999) {
+            require(msg.value == price * quantity * 2, "The price is invalid");
+        }
+
+        // QUANTITY RELATED
         require(quantity <= maxPerMint, "Too Many Minted");
         require(
             totalSupply() + quantity <= _maxSupply,
             "Maximum supply exceeded"
         );
+
+        // GO TIME
         _mint(msg.sender, quantity);
     }
 
-    function ownerMint(uint256 quantity) external payable onlyOwner {
-        require(quantity <= maxPerMint * 5, "The price is invalid");
-        require(
-            totalSupply() + quantity <= _maxSupply,
-            "Maximum supply exceeded"
-        );
-        _mint(msg.sender, quantity);
+    /// -------------------------------------
+    /// 🪙 OWNER MINT - One time use.
+    /// -------------------------------------
+
+    bool public ownerMinted = false;
+
+    function ownerMint() external payable onlyOwner {
+        require(ownerMinted == false, "OWNER U ALREADY MINTED U IDIOT");
+        require(totalSupply() + 100 <= _maxSupply, "Maximum supply exceeded");
+        ownerMinted = true;
+        _mint(msg.sender, 100);
     }
 
-    /*/////////////////////////////////////////////////////////////////////////////
-        Below is the base URI stuff, it will point to the lyra server, which will
-        be a proxy for more permanent storage solutions such as IPFS.
-    /////////////////////////////////////////////////////////////////////////////*/
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
-    }
-
-    function setBaseURI(string memory _baseUri) public onlyOwner {
-        baseURI = _baseUri;
-    }
-
-    /*///////////////////////////////////////////////////////////
-        Withdraw function to get ether out of the contract
-    ///////////////////////////////////////////////////////////*/
+    /// -------------------------------------
+    /// 🏦 Withdraw
+    /// -------------------------------------
 
     function withdraw() external onlyOwner {
         require(address(this).balance > 0, "Nothing to release");
@@ -154,9 +185,13 @@ contract FomoFugitive is ERC721A, Ownable {
         require(success, "withdraw failed");
     }
 
-    /*///////////////////////////////////////////////////////////
-        Price
-    ///////////////////////////////////////////////////////////*/
+    /// -------------------------------------
+    /// 💰 Price
+    ///
+    /// Hopefully this stuff will not be
+    /// needed, but may have to reduce price
+    /// if players aren't minting.
+    /// -------------------------------------
 
     function getPrice() public view returns (uint256) {
         return price;
@@ -166,9 +201,18 @@ contract FomoFugitive is ERC721A, Ownable {
         price = _price;
     }
 
-    /*///////////////////////////////////////////////////////////
-        Token URI
-    ///////////////////////////////////////////////////////////*/
+    /// -------------------------------------
+    /// 🔗 BASE URI and TOKEN URI
+    /// -------------------------------------
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
+    }
+
+    function setBaseURI(string memory _baseUri) public onlyOwner {
+        baseURI = _baseUri;
+    }
+
     function tokenURI(uint256 _tokenId)
         public
         view
