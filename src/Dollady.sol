@@ -4,17 +4,37 @@ pragma solidity ^0.8.12;
 import "@ERC721A/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Dloot is ERC721A, Ownable {
-    // Placeholder price
-    uint256 public price = 0.003 ether;
-    uint256 public maxPerMint = 10;
+/* ,------.         ,--.,--.           ,--.
+  |  .-.  \  ,---. |  ||  | ,--,--. ,-|  |,--. ,--.
+  |  |  \  :| .-. ||  ||  |' ,-.  |' .-. | \  '  /
+  |  '--'  /' '-' '|  ||  |\ '-'  |\ `-' |  \   '
+  `-------'  `---' `--'`--' `--`--' `---' .-'  /
+                    daycare               `--*/
+/*
+                      &&&
+                   &&(x.x)&&
+                   ___\=/___
+                  (|_ ~~~ _|)
+                     )___(
+                   /'     `\
+                  ~~~~~~~~~~~
+                  `~//~~~\\~'
+                   /_)   /_)
+
+*/
+
+contract Dollady is ERC721A, Ownable {
+    uint64 public immutable _maxSupply = 777;
+    uint256 public price = 0.007 ether;
+    uint256 public maxPerMint = 7;
+
+    // image ipfs: ipfs://bafybeig44calwgq463zey2xycojswdxnm4efjgi7mckfr4vkstfy7oazoe/
+    // json ipfs: ipfs://bafybeic3zfaptjliooe75ahpgjudssskm5p4tzpcwd3pozegvo2s7myfp4
 
     string private baseURI =
-        "ipfs://bafybeifcca6qpeiups6gzqalh6etwpq6h5y3cakrv7s6zxr2mz3aderjdi/";
+        "ipfs://bafybeic3zfaptjliooe75ahpgjudssskm5p4tzpcwd3pozegvo2s7myfp4/";
 
-    uint64 public immutable _maxSupply = 155;
-
-    constructor() ERC721A("AI FEETSIES", "FEETAI") {}
+    constructor() ERC721A("DOLLADY", "DOLLS") {}
 
     /*///////////////////////////////////
                     Mint

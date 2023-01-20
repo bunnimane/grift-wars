@@ -2,10 +2,10 @@
 pragma solidity ^0.8.12;
 
 import "../lib/forge-std/src/Test.sol";
-import "../src/Dloot.sol";
+import "../src/Dollady.sol";
 
 contract LyraTest is Test {
-    Dloot dloot;
+    Dollady dloot;
     address owner;
     address someUser;
     uint256 public price;
@@ -22,8 +22,8 @@ contract LyraTest is Test {
 
     function setUp() public {
         owner = address(this);
-        price = 0.003 ether;
-        dloot = new Dloot();
+        price = 0.007 ether;
+        dloot = new Dollady();
         vm.deal(dloot.owner(), 10 ether);
         string
             memory mnemonic = "test test test test test test test test test test test junk";
@@ -49,13 +49,14 @@ contract LyraTest is Test {
     }
 
     function testMintOverflow() public {
-        uint256 quantity = 10;
-        for (uint256 i = 0; i < 15; i++) {
+        uint256 quantity = 7;
+        for (uint256 i = 0; i < 110; i++) {
             dloot.mint{value: price * quantity}(quantity);
         }
-        assertEq(dloot.totalSupply(), 150);
+        dloot.mint{value: price * 7}(7);
+        assertEq(dloot.totalSupply(), 777);
         vm.expectRevert("Maximum supply exceeded");
-        dloot.mint{value: price * 10}(10);
+        dloot.mint{value: price * 7}(7);
     }
 
     /// -----------------------------------------------------------------------
@@ -63,7 +64,7 @@ contract LyraTest is Test {
     /// -----------------------------------------------------------------------
 
     function testOwnerMintSuccess() public {
-        uint256 quantity = 50;
+        uint256 quantity = 35;
         dloot.ownerMint{value: 0}(quantity);
         assertEq(dloot.totalSupply(), quantity);
     }
@@ -78,10 +79,10 @@ contract LyraTest is Test {
 
     function testOwnerMintOverflow() public {
         uint256 quantity = 10;
-        for (uint256 i = 0; i < 15; i++) {
+        for (uint256 i = 0; i < 77; i++) {
             dloot.ownerMint{value: 0}(quantity);
         }
-        assertEq(dloot.totalSupply(), 150);
+        assertEq(dloot.totalSupply(), 770);
         vm.expectRevert("Maximum supply exceeded");
         dloot.ownerMint{value: 0}(10);
     }
@@ -133,11 +134,11 @@ contract LyraTest is Test {
     /// -----------------------------------------------------------------------
 
     function testTokenURI() public {
-        dloot.mint{value: price * 10}(10);
+        dloot.mint{value: price * 7}(7);
         string memory uri = dloot.tokenURI(2);
         assertEq(
             uri,
-            "ipfs://bafybeifcca6qpeiups6gzqalh6etwpq6h5y3cakrv7s6zxr2mz3aderjdi/2.json"
+            "ipfs://bafybeig44calwgq463zey2xycojswdxnm4efjgi7mckfr4vkstfy7oazoe/2.json"
         );
     }
 }
