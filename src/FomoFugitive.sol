@@ -10,7 +10,7 @@ import "@solady/utils/Base64.sol";
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀ ⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣠⣾⣿⣿⣷⣄⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿⣿⣿⣿⣿⣿⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
-    ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿⣿⣿⣿⣿⣿ ⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
+    ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿O⣿⣿O⣿  ⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⣿⣿⣿⣿⣿⣿⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⢿⣿⣿⣿⣿⡿⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
     ⠀⣿⣿⠀⠀⠀⠀⠀⠀⢸⣿⠀⠀⣙⣛⣛⣋⠀⠀⣿⡇⠀⠀⠀⠀⠀⠀⣿⣿⠀
@@ -22,47 +22,43 @@ import "@solady/utils/Base64.sol";
     ⠀⣿⣿⠀⠀⠀⠀⣿⡇⢸⣿⠀⣿⣿⣿⣿⣿⣿⠀⣿⡇⢸⣿⠀⠀⠀⠀⣿⣿⠀
     ⠀⠛⠛⠀⠀⠀⠀⠛⠃⠘⠛⠀⠛⠛⠛⠛⠛⠛⠀⠛⠃⠘⠛⠀⠀⠀⠀⠛⠛⠀
 
-    10,000 unique remilio64 fugitives on the 
+    10,000 unique rogue remilio64  on the 
     block chain. The grift thickens.
 
-    10 factions of fugitives, divided equally.
+    10 factions of rogues, divided equally.
     Faction assigned randomly to remilios.
 
     **GAME BEGINS WHEN MINTED OUT**
 
     /// -------------------------------------
-    /// 🪙 MINTING 
+    /// 🪙 MINTING - Phase 1
     /// -------------------------------------
 
-    - 0.007Ξ~ avg mint
+    - 0.0053Ξ~ avg mint
+        - Twitter interactions WL'd
+        - Dollady holders get 2 free per dollady.
+        - Remilio holders get up to 1 free per wallet.
         - first  1000 mints are FRΞΞ
-        - middle 7000 mints are 0.007Ξ
-        - last   2000 mints are 0.014Ξ
-        - max 10 per tx
+        - middle 7000 mints are 0.005Ξ
+        - last   2000 mints are 0.009Ξ
+        - max 20 per tx
+
+        WL period will be about 2 days.
+        Then public mint will open.
+        
 
     /// -------------------------------------
-    /// 🎮 GAME MECHANICS 
+    /// 🎮 VOTING GAME - Phase 2
     /// -------------------------------------
 
-    • Every 2 days there is a vote to kill
+    • Days period X will be figured out by 
+      twitter vote.
+
+    • Every X days there is a vote to kill
       off one of the factions. 🔫
-tokenFaction
-    • Each fugitive is eligible to lock in 1
+
+    • Each rogue is eligible to lock in 1
       vote for a faction to kill off.
-
-    • Each vote costs 0.006Ξ + (0.002Ξ * round)
-
-    *************************************************
-    *             ! !  IMPORTANT ! !                *
-    *************************************************
-    ** IF A FUGITIVE IS TRADED AFTER IT HAS VOTED  **
-    **  IT'S VOTE WILL BE RESET AND THE NEW OWNER  **
-    **      WILL BE ABLE TO PLACE A NEW VOTE       **    
-    *************************************************
-
-    • AFTER 18 days (IF NO TIES), there will be 
-      one faction left. They will be able to split 
-      the VOTING POOL amongst themselves.
 
     *************************************************
     *             ! !  IMPORTANT ! !                *
@@ -71,40 +67,117 @@ tokenFaction
     **       THE GAME IS EXTENDED BY 2 DAYS        **    
     *************************************************
 
+    • Each vote costs 0.004Ξ + (0.002Ξ * round).
+
+    *************************************************
+    *             ! !  IMPORTANT ! !                *
+    *************************************************
+    ** IF A ROGUE IS TRADED AFTER IT HAS VOTED     **
+    **  IT'S VOTE WILL BE RESET AND THE NEW OWNER  **
+    **    WILL BE ABLE TO PLACE A NEW VOTE. THE    **
+    ** PREVIOUS OWNER WILL NOT BE ISSUED A REFUND. **    
+    *************************************************
+
+    • AFTER 9 rounds (IF NO TIES), there will be 
+      ONE faction left. THIS IS THE CHOSEN FACTION
+      WHO WILL HAVE ONE FINAL VOTE ON WHICH % OF
+      THE SWEEP POOL GOES TO EACH MILADY 
+      COLLECTION TO SWEEP.
+
     ℹ️ - For a player who wants to vote every round,
-          this will cost UP TO (0.069Ξ + 0.006Ξ)
-                = 0.075Ξ per fugitive
+          this will cost UP TO (0.036Ξ + 0.005Ξ)
+                = 0.041Ξ per rogue.
 
     /// -------------------------------------
-    /// ✔️ VOTING POOL
+    /// ✔️ SWEEP POOL - Phase 3
     /// ------------------------------------- 
 
-    The Voting pool consists of 67% of the total 
-    Ether collected from voting. The remaining 
+    The SWEEP POOL consists of 67% of the total 
+    Ether collected from VOTING. The remaining 
     33% is transferred to the development team.
 
-
-    THEORETICAL VOTING POOL:
+    THEORETICAL SWEEP POOL:
 
      9                   
     ___           
     ╲     
-    ╱   (0.006 + 0.0002*n)*(10000-1000*n) ~= 363Ξ
+    ╱   (0.004 + 0.0002*n)*(10000-1000*n) ~= 253Ξ
     ‾‾‾        
     i = 0                 
 
     OR
 
-    sum((0.006 + 0.0002*n)*(10000-1000*n)) where n=0 to 9 ~= 363Ξ
+    sum((0.004 + 0.0002*n)*(10000-1000*n)) where n=0 to 9 ~= 253Ξ
 
-    = 364Ξ * 0.67 ~= 243Ξ
+    = 253Ξ * 0.67 ~= 169Ξ
 
-    ! TOTAL MAX POSSIBLE PRIZE POOL IS AROUND 243Ξ !
+    -> TOTAL MAX POSSIBLE SWEEP POOL IS APPROX 169Ξ
 
-    ℹ️ - This means each remaining fugitive could be worth
-        around ~0.224Ξ. This would make it about a ~3x 
-        from a 0.075 cost to fully play or a ~30x from player 
+    ℹ️ - In reality it will likely be much lower since
+        many tokens will not vote every single round. 
+
+    ℹ️ - This means each remaining rogue has a max buying 
+        power around ~0.169Ξ. This would make it about a ~4x 
+        from a 0.041 cost to fully play or a ~35x from player 
         who just mints at avg cost.
+
+    /// -------------------------------------
+    /// 🧹 THE SWEEP - Phase 4
+    /// ------------------------------------- 
+
+    After 9 round of voting, there will be one
+    faction left that's responsible to vote* on 
+    this FINAL PROPOSAL. The options of the
+    final proposal will be between the following 
+    collections:
+
+        - Milady Maker
+        - Redacted Remilio Babies
+        - Pixelady Maker
+        - Ghiblady
+        - Milady Station
+        - Radbros
+    
+    *This vote will be free (minus cost of gas).
+
+    *************************************************
+    *             ! !  IMPORTANT ! !                *
+    *************************************************
+    ** IF A ROGUE IS TRADED AFTER IT HAS VOTED     **
+    **  IT'S VOTE WILL BE RESET AND THE NEW OWNER  **
+    **    WILL BE ABLE TO PLACE A NEW VOTE.        **
+    *************************************************
+
+    The percentage of votes for any option will directly
+    map to the percentage of the SWEEP POOL used to 
+    sweep that collection. This means multiple collections
+    will be sweeped with various amounts of ether from
+    the SWEEP POOL.
+
+    Example: final votes look as follows
+
+        - Milady Maker - 5%
+        - RRB          - 30%
+        - PL           - 10%
+        - Ghiblady     - 10%
+        - Milady Sta   - 20%
+        - Radbros      - 25%
+
+    And the sweep pool is theoretical max of ~169Ξ. This
+    means each the above collections will get swept with:
+
+        - Milady Maker - 8.45Ξ
+        - RRB          - 50Ξ
+        - PL           - 16.9Ξ
+        - Ghiblady     - 16.9Ξ
+        - Milady Sta   - 33.8Ξ
+        - Radbros      - 42.25Ξ
+
+
+    The NFT's that are swept will be locked in the contract
+    account and unable to go back into circulation. So 
+    effectively sweep floor + perma lock supply.
+
 
 */
 
@@ -114,7 +187,14 @@ contract FomoFugitive is ERC721A, Ownable {
     uint256 public maxPerMint = 10;
     bool public mintOpened = false;
 
-    // FACTIONS SET UP
+    /// -------------------------------------
+    /// 🦹 FACTIONS
+    ///
+    ///    TEN FACTIONS that will be randomly
+    ///    assigned on mint to the rogue
+    ///    remilio 64s.
+    /// -------------------------------------
+
     uint256 public ItalianMafia = 1000;
     uint256 public RussianMafia = 1000;
     uint256 public ChineseTriads = 1000;
@@ -126,8 +206,55 @@ contract FomoFugitive is ERC721A, Ownable {
     uint256 public AlbanianMafia = 1000;
     uint256 public HellsAngels = 1000;
 
+    function getItalianMafia() public view returns (uint256) {
+        return ItalianMafia;
+    }
+
+    function getRussianMafia() public view returns (uint256) {
+        return RussianMafia;
+    }
+
+    function getChineseTriads() public view returns (uint256) {
+        return ChineseTriads;
+    }
+
+    function getColombianNarcos() public view returns (uint256) {
+        return ColombianNarcos;
+    }
+
+    function getMexicanCartels() public view returns (uint256) {
+        return MexicanCartels;
+    }
+
+    function getYakuza() public view returns (uint256) {
+        return Yakuza;
+    }
+
+    function getCosaNostra() public view returns (uint256) {
+        return CosaNostra;
+    }
+
+    function getIrishMob() public view returns (uint256) {
+        return IrishMob;
+    }
+
+    function getAlbanianMafia() public view returns (uint256) {
+        return AlbanianMafia;
+    }
+
+    function getHellsAngels() public view returns (uint256) {
+        return HellsAngels;
+    }
+
+    // This variable gets initialized in the constructor
+    // and populated with the faction names.
     mapping(uint256 => string) public factionNames;
 
+    // This function uses pseudorandomness to choose
+    // a faction that has remaining availability
+    // and remove 1 from the availability and return
+    // it to the CREATE DNA function, which assigns
+    // the faction to the tokenFaction map.
     function subtractFromRandomFaction(uint256 totalminted)
         public
         returns (uint256 faction)
@@ -185,20 +312,23 @@ contract FomoFugitive is ERC721A, Ownable {
         }
     }
 
+    string private imgURI =
+        "ipfs://bafybeig7jmw2nbbmbjhthyhscleq66gab5ivliwdlu6kwnetrxiemktll4/";
     string private baseURI =
         "ipfs://bafybeig7jmw2nbbmbjhthyhscleq66gab5ivliwdlu6kwnetrxiemktll4/";
 
     constructor() ERC721A("FOMO FUGITIVES", "FUGI") {
-        factionNames[0] = "ItalianMafia";
-        factionNames[1] = "RussianMafia";
-        factionNames[2] = "ChineseTriads";
-        factionNames[3] = "ColombianNarcos";
-        factionNames[4] = "MexicanCartels";
+        // Set Faction names for readability
+        factionNames[0] = "Italian Mafia";
+        factionNames[1] = "Russian Mafia";
+        factionNames[2] = "Chinese Triads";
+        factionNames[3] = "Colombian Narcos";
+        factionNames[4] = "Mexican Cartels";
         factionNames[5] = "Yakuza";
-        factionNames[6] = "CosaNostra";
-        factionNames[7] = "IrishMob";
-        factionNames[8] = "AlbanianMafia";
-        factionNames[9] = "HellsAngels";
+        factionNames[6] = "Cosa Nostra";
+        factionNames[7] = "Irish Mob";
+        factionNames[8] = "Albanian Mafia";
+        factionNames[9] = "Hells Angels";
     }
 
     /// -------------------------------------
@@ -211,7 +341,7 @@ contract FomoFugitive is ERC721A, Ownable {
     //     - max 10 per tx
     //
     // ℹ️ - Be aware that some minters could
-    //     could get fugitives at the prev
+    //     could get rogues at the prev
     //     tier price, if they are mitning
     //     over the boundries. Consider
     //     this an intended gift should it
@@ -249,17 +379,13 @@ contract FomoFugitive is ERC721A, Ownable {
     }
 
     /// -------------------------------------
-    /// 🪙 CREATE DNA -
+    /// 🧬 CREATE DNA -
     ///    Assigns a faction to newly minted
     ///    R64. Also tokenURI function to
     ///    return the faction and image.
     /// -------------------------------------
 
     mapping(uint256 => uint256) public tokenFaction;
-
-    function setValue(uint256 key, uint256 value) public {
-        tokenFaction[key] = value;
-    }
 
     function getValue(uint256 key) public view returns (uint256) {
         return tokenFaction[key];
@@ -286,7 +412,7 @@ contract FomoFugitive is ERC721A, Ownable {
                             '{"name": "#',
                             _toString(tokenId),
                             '", "image": "',
-                            baseURI,
+                            imgURI,
                             _toString(tokenId),
                             ".png",
                             '",',
@@ -308,10 +434,23 @@ contract FomoFugitive is ERC721A, Ownable {
     bool public ownerMinted = false;
 
     function ownerMint() external payable onlyOwner {
+        // Set Quantity
+        uint256 quantity = 200;
+
         require(ownerMinted == false, "OWNER U ALREADY MINTED U IDIOT");
-        require(totalSupply() + 100 <= _maxSupply, "Maximum supply exceeded");
+        require(
+            totalSupply() + quantity <= _maxSupply,
+            "Maximum supply exceeded"
+        );
+
+        // Mint and Generate Faction
+        uint256 totalminted = _totalMinted();
+        uint256 newSupply = totalminted + quantity;
+        _mint(msg.sender, quantity);
+        for (; totalminted < newSupply; ++totalminted) {
+            createDNA(totalminted);
+        }
         ownerMinted = true;
-        _mint(msg.sender, 100);
     }
 
     /// -------------------------------------
