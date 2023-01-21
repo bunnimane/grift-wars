@@ -3,6 +3,7 @@ pragma solidity ^0.8.12;
 
 import "@ERC721A/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@solady/utils/Base64.sol";
 
 /* 
     ⠀⣤⣤⠀⠀⠀⠀⠀⠀⢠⣤⠀⠀⠀⠀⠀⠀⠀⠀ ⣤⡄⠀⠀⠀⠀⠀⠀⣤⣤⠀
@@ -127,10 +128,16 @@ contract FomoFugitive is ERC721A, Ownable {
 
     mapping(uint256 => string) public factionNames;
 
-    function subtractFromRandomFaction() public returns (uint256 faction) {
+    function subtractFromRandomFaction(uint256 totalminted)
+        public
+        returns (uint256 faction)
+    {
         uint256 randomIndex = uint256(
-            keccak256(abi.encodePacked(block.timestamp, block.difficulty))
+            keccak256(
+                abi.encodePacked(block.timestamp, block.difficulty, totalminted)
+            )
         ) % 10;
+        uint256 i = 0;
         while (true) {
             if (randomIndex == 0 && ItalianMafia != 0) {
                 ItalianMafia--;
@@ -163,21 +170,23 @@ contract FomoFugitive is ERC721A, Ownable {
                 HellsAngels--;
                 return randomIndex;
             }
+            ++i;
             randomIndex =
                 uint256(
                     keccak256(
-                        abi.encodePacked(block.timestamp, block.difficulty)
+                        abi.encodePacked(
+                            block.timestamp,
+                            block.difficulty,
+                            totalminted + i
+                        )
                     )
                 ) %
                 10;
         }
     }
 
-    // image ipfs: ipfs://bafybeig44calwgq463zey2xycojswdxnm4efjgi7mckfr4vkstfy7oazoe/
-    // json ipfs: ipfs://bafybeic3zfaptjliooe75ahpgjudssskm5p4tzpcwd3pozegvo2s7myfp4
-
     string private baseURI =
-        "ipfs://bafybeic3zfaptjliooe75ahpgjudssskm5p4tzpcwd3pozegvo2s7myfp4/";
+        "ipfs://bafybeig7jmw2nbbmbjhthyhscleq66gab5ivliwdlu6kwnetrxiemktll4/";
 
     constructor() ERC721A("FOMO FUGITIVES", "FUGI") {
         factionNames[0] = "ItalianMafia";
@@ -210,7 +219,7 @@ contract FomoFugitive is ERC721A, Ownable {
 
     function mint(uint256 quantity) external payable {
         // MINT MUST BE OPENED
-        require(mintOpened == true, "THE MINT IS NOT LIVE");
+        //require(mintOpened == true, "THE MINT IS NOT LIVE");
 
         // Whitelist logic goes here 🪆
 
@@ -224,7 +233,7 @@ contract FomoFugitive is ERC721A, Ownable {
         }
 
         // QUANTITY RELATED
-        require(quantity <= maxPerMint, "Too Many Minted");
+        //require(quantity <= maxPerMint, "Too Many Minted");
         require(
             totalSupply() + quantity <= _maxSupply,
             "Maximum supply exceeded"
@@ -257,7 +266,7 @@ contract FomoFugitive is ERC721A, Ownable {
     }
 
     function createDNA(uint256 totalminted) private {
-        tokenFaction[totalminted] = subtractFromRandomFaction();
+        tokenFaction[totalminted] = subtractFromRandomFaction(totalminted);
     }
 
     function tokenURI(uint256 tokenId)
@@ -266,6 +275,7 @@ contract FomoFugitive is ERC721A, Ownable {
         override(ERC721A)
         returns (string memory)
     {
+        string storage factionName = factionNames[tokenFaction[tokenId]];
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
         return
             string(
@@ -275,11 +285,16 @@ contract FomoFugitive is ERC721A, Ownable {
                         abi.encodePacked(
                             '{"name": "#',
                             _toString(tokenId),
+                            '", "image": "',
+                            baseURI,
+                            _toString(tokenId),
+                            ".png",
+                            '",',
+                            '"attributes": [',
                             '{"faction": "',
-                            _toString(factionNames[tokenFaction[tokenId]]),
-                            '", "image": "ipfs://bafybeig7jmw2nbbmbjhthyhscleq66gab5ivliwdlu6kwnetrxiemktll4/,',
-                            Base64.encode(bytes(tokenIdToSVG(tokenId))),
-                            "}"
+                            factionName,
+                            '"',
+                            "}]}"
                         )
                     )
                 )
