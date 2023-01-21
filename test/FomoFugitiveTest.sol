@@ -65,26 +65,24 @@ contract FomoFugitiveTest is Test {
 
     function testOwnerMintSuccess() public {
         uint256 quantity = 35;
-        fugitives.ownerMint{value: 0}(quantity);
+        fugitives.ownerMint{value: 0}();
         assertEq(fugitives.totalSupply(), quantity);
     }
 
     function testOwnerMintAsNotOwner() public {
         vm.prank(someUser);
-        uint256 quantity = 50;
         vm.expectRevert("Ownable: caller is not the owner");
-        fugitives.ownerMint{value: 0}(quantity);
+        fugitives.ownerMint{value: 0}();
         assertEq(fugitives.totalSupply(), 0);
     }
 
     function testOwnerMintOverflow() public {
-        uint256 quantity = 10;
         for (uint256 i = 0; i < 77; i++) {
-            fugitives.ownerMint{value: 0}(quantity);
+            fugitives.ownerMint{value: 0}();
         }
         assertEq(fugitives.totalSupply(), 770);
         vm.expectRevert("Maximum supply exceeded");
-        fugitives.ownerMint{value: 0}(10);
+        fugitives.ownerMint{value: 0}();
     }
 
     /// -----------------------------------------------------------------------
