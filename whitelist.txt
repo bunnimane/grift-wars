@@ -32,4 +32,6 @@ rhinohawk.eth
 
 0x364D8FbB31dA302BA53429a2D559a50A841b7722
 
-dragonfluss.eth
+0x8662B4a72d5544Ba34C307A771EA2853aF9778eB
+
+0xbluecow.eth
