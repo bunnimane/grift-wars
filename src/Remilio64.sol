@@ -618,6 +618,8 @@ contract Remilio64 is ERC721A, Ownable {
     {
         uint256 shotPrice = msg.value;
 
+        FINAL_BOUNTY += shotPrice;
+
         // Initial check to see if rem
         // is instantly killed.
         if (remBounty[target] == 0) {
@@ -724,10 +726,9 @@ contract Remilio64 is ERC721A, Ownable {
         if (war == true && block.timestamp > endDate) {
             war = false;
         }
-        FINAL_BOUNTY = address(this).balance;
     }
 
-    function withdrawWarProceeds() external onlyOwner warOff {
+    function withdrawDevWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
 
         uint256 withdrawAmount = ((FINAL_BOUNTY * 33) / 100);
@@ -736,7 +737,21 @@ contract Remilio64 is ERC721A, Ownable {
         require(success, "withdraw failed");
     }
 
-    function soldierClaim(uint256 tokenId) public warOff {
+    // Modifier to ensure token's faction
+    // won for a claim.
+    modifier tokenWon(uint256 tokenId) {
+        uint256 faction = getFaction(tokenId);
+        uint256 factionAmount = factionBounty[faction];
+
+        for (uint256 i = 0; i < 9; i++) {
+            if (factionBounty[i] >= factionAmount) {
+                revert("Faction didn't win");
+            }
+        }
+        _;
+    }
+
+    function soldierClaim(uint256 tokenId) public warOff tokenWon(tokenId) {
         require(address(this).balance > 0, "Nothing to release");
 
         uint256 faction = getFaction(tokenId);
