@@ -732,6 +732,7 @@ contract Remilio64 is ERC721A, Ownable {
         require(success, "withdraw failed");
     }
 
+    // TODO: Get this to work lmao.
     function soldierClaim(uint256 tokenId) public warOff {
         require(address(this).balance > 0, "Nothing to release");
 
