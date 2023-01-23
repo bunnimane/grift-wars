@@ -21,6 +21,10 @@ error RemDead();
 error InvalidShotPrice();
 error PaidTooMuch();
 
+// War not started
+error WarNotStarted();
+error WarStarted();
+
 contract Remilio64 is ERC721A, Ownable {
     // Contracts for free mints
     address dollady = 0x233580FE8E1985127D1DaCF2a9EE342049b0Dad8;
@@ -290,7 +294,7 @@ contract Remilio64 is ERC721A, Ownable {
         require(dolladyMinted[msg.sender] != true, "Wallet Already Minted");
         // get quantity
         uint256 quantity = remilioContract.balanceOf(msg.sender);
-        require(quantity * 2 <= maxPerMint, "Too Many Minted");
+        require(quantity * 4 <= maxPerMint, "Too Many Minted");
         if (totalSupply() + quantity > _maxSupply) {
             revert MaxSupplyExceeded();
         }
@@ -554,6 +558,7 @@ contract Remilio64 is ERC721A, Ownable {
         return remBounty[tokenId];
     }
 
+    // Owner override for checking RemBounty, used for testing.
     function changeRemBounty(uint256 tokenId, uint256 bounty)
         public
         onlyOwner
@@ -604,6 +609,7 @@ contract Remilio64 is ERC721A, Ownable {
     function shootRem(uint256 shotta, uint256 target)
         public
         payable
+        warOn
         checkAlive(shotta)
         checkAlive(target)
         minShotPrice(msg.value)
@@ -650,5 +656,64 @@ contract Remilio64 is ERC721A, Ownable {
                 return;
             }
         }
+    }
+
+    /// -------------------------------------
+    /// 💣 WAR DECLARED
+    /// -------------------------------------
+
+    bool war = false;
+    uint256 startDate;
+    uint256 endDate;
+
+    // This won't work
+    modifier warOn() {
+        if (block.timestamp > endDate) {
+            war = false;
+            return;
+        }
+        if (war == false) {
+            revert WarNotStarted();
+        }
+        _;
+    }
+
+    modifier warOff() {
+        if (war == true) {
+            revert WarStarted();
+        }
+        _;
+    }
+
+    function startWar(uint256 endingDate) public onlyOwner warOff {
+        startDate = block.timestamp;
+        endDate = endingDate;
+        war = true;
+    }
+
+    /// -------------------------------------
+    /// 💣 WAR ENDED
+    /// -------------------------------------
+
+    function withdrawWarProceeds() external onlyOwner warOff {
+        require(address(this).balance > 0, "Nothing to release");
+        (bool success, ) = payable(owner()).call{
+            value: ((address(this).balance * 33) / 100)
+        }("");
+        require(success, "withdraw failed");
+    }
+
+    function soldierClaim(uint256 tokenId) public warOff {
+        require(address(this).balance > 0, "Nothing to release");
+
+        uint256 faction = getFaction(tokenId);
+
+        uint256 facBounty = factionBounty[faction];
+
+        uint256 claimAmount = ((remBounty[tokenId] * 100) / facBounty);
+        (bool success, ) = payable(address(msg.sender)).call{
+            value: ((address(this).balance * 33) / 100)
+        }("");
+        require(success, "withdraw failed");
     }
 }
