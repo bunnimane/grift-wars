@@ -310,7 +310,7 @@ contract Remilio64 is ERC721A, Ownable {
     ///     remilio minting, they said
     ///     they would promo if I allow it,
     ///     but if that falls through I turn
-    ///     it off 🧀🐀
+    ///     it off 🧀🐀 never truss an anon 🐍
     ///     https://imgur.com/a/32uVYSI
     /// -------------------------------------
 
@@ -718,17 +718,21 @@ contract Remilio64 is ERC721A, Ownable {
     // public service should dev team be unable
     // to call off the war.
 
+    uint256 FINAL_BOUNTY;
+
     function endWarOfficially() public warOn {
         if (war == true && block.timestamp > endDate) {
             war = false;
         }
+        FINAL_BOUNTY = address(this).balance;
     }
 
     function withdrawWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
-        (bool success, ) = payable(owner()).call{
-            value: ((address(this).balance * 33) / 100)
-        }("");
+
+        uint256 withdrawAmount = ((address(this).balance * 33) / 100);
+        (bool success, ) = payable(owner()).call{value: withdrawAmount}("");
+        FINAL_BOUNTY = withdrawAmount;
         require(success, "withdraw failed");
     }
 
