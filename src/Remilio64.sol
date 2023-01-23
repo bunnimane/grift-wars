@@ -743,8 +743,8 @@ contract Remilio64 is ERC721A, Ownable {
         uint256 faction = getFaction(tokenId);
         uint256 factionAmount = factionBounty[faction];
 
-        for (uint256 i = 0; i < 9; i++) {
-            if (factionBounty[i] >= factionAmount) {
+        for (uint256 i = 0; i < factionBounty.length; i++) {
+            if (factionBounty[i] > factionAmount) {
                 revert("Faction didn't win");
             }
         }
