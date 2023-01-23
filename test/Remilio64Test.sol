@@ -39,8 +39,8 @@ contract FomoFugitiveTest is Test {
 
     function testMintSuccess() public {
         uint256 quantity = 2;
-        _Remilio64.mint{value: price * quantity}(quantity);
-        assertEq(address(_Remilio64).balance, price * quantity);
+        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
+        assertEq(address(_Remilio64).balance, 0.001 ether * quantity);
         assertEq(_Remilio64.balanceOf(address(this)), quantity);
     }
 
@@ -53,7 +53,7 @@ contract FomoFugitiveTest is Test {
     function testMintOverflow() public {
         // First Tier
         for (uint256 i = 0; i <= 999; i++) {
-            _Remilio64.mint{value: 0 ether}(1);
+            _Remilio64.mint{value: 0.001 ether}(1);
         }
 
         // Second Tier
@@ -130,7 +130,7 @@ contract FomoFugitiveTest is Test {
         uint256 oldBalance = address(this).balance;
         uint256 contractBalance = address(_Remilio64).balance;
         uint256 quantity = 3;
-        _Remilio64.mint{value: price * quantity}(quantity);
+        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
         _Remilio64.withdraw();
         assertEq(address(this).balance, oldBalance + contractBalance);
         assertEq(address(_Remilio64).balance, 0);
@@ -138,11 +138,11 @@ contract FomoFugitiveTest is Test {
 
     function testWithdrawAsNotOwner() public {
         uint256 quantity = 6;
-        _Remilio64.mint{value: price * quantity}(quantity);
+        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
         vm.prank(someUser);
         vm.expectRevert("Ownable: caller is not the owner");
         _Remilio64.withdraw();
-        assertEq(address(_Remilio64).balance, price * quantity);
+        assertEq(address(_Remilio64).balance, 0.001 ether * quantity);
     }
 
     /// -----------------------------------------------------------------------
@@ -167,7 +167,7 @@ contract FomoFugitiveTest is Test {
     /// -----------------------------------------------------------------------
 
     function testTokenURI() public {
-        _Remilio64.mint{value: price * 7}(7);
+        _Remilio64.mint{value: 0.001 ether * 7}(7);
         string memory uri = _Remilio64.tokenURI(2);
         assertEq(
             uri,
@@ -177,5 +177,35 @@ contract FomoFugitiveTest is Test {
                 "/2"
             )
         );
+    }
+
+    /// -------------------------------------
+    /// 🔫 Rem64 Wars TESTING SUITE
+    /// -------------------------------------
+
+    function testAllRemsAlive() public {
+        testMintOverflow(); // mint max
+        for (uint256 i = 0; i < 9999; ++i) {
+            assertEq(_Remilio64.getRemAlive(i), true);
+        }
+    }
+
+    function testAllRemsBounties() public {
+        testMintOverflow(); // mint max
+        for (uint256 i = 0; i < 9999; ++i) {
+            assertEq(_Remilio64.getRemBounty(i), 0);
+        }
+    }
+
+    function testKillRem() public {
+        testMintOverflow(); // mint max
+        _Remilio64.killRem(1);
+        for (uint256 i = 0; i < 9999; ++i) {
+            if (i == 1) {
+                assertEq(_Remilio64.getRemAlive(i), false);
+            } else {
+                assertEq(_Remilio64.getRemAlive(i), true);
+            }
+        }
     }
 }
