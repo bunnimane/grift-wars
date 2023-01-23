@@ -730,13 +730,12 @@ contract Remilio64 is ERC721A, Ownable {
     function withdrawWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
 
-        uint256 withdrawAmount = ((address(this).balance * 33) / 100);
+        uint256 withdrawAmount = ((FINAL_BOUNTY * 33) / 100);
         (bool success, ) = payable(owner()).call{value: withdrawAmount}("");
-        FINAL_BOUNTY = withdrawAmount;
+        FINAL_BOUNTY -= withdrawAmount;
         require(success, "withdraw failed");
     }
 
-    // TODO: Get this to work lmao.
     function soldierClaim(uint256 tokenId) public warOff {
         require(address(this).balance > 0, "Nothing to release");
 
@@ -745,9 +744,15 @@ contract Remilio64 is ERC721A, Ownable {
         uint256 facBounty = factionBounty[faction];
 
         uint256 claimAmount = ((remBounty[tokenId] * 100) / facBounty);
+
+        uint256 withdrawAmount = ((FINAL_BOUNTY * claimAmount) / 100);
+
         (bool success, ) = payable(address(msg.sender)).call{
-            value: ((address(this).balance * 33) / 100)
+            value: withdrawAmount
         }("");
+
+        FINAL_BOUNTY -= withdrawAmount;
+        remBounty[tokenId] = 0;
         require(success, "withdraw failed");
     }
 }
