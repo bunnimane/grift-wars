@@ -459,6 +459,8 @@ contract Remilio64 is ERC721A, Ownable {
             - IF A's new bounty is >0, it is still ALIVE with
             with old_bounty - X.
 
+        - These bounty changes reflected in the FACTION_BOUNTY
+
         EVERYTIME A REMILIO KILLS ANOTHER REMILIO, IT'S KILL
         COUNT WILL INCREASE BY 1. THIS IS SIMPLY A VANITY METRIC
         BUT A COOL FLEX 💪.
@@ -475,7 +477,7 @@ contract Remilio64 is ERC721A, Ownable {
     - The 33% of the FINAL_BOUNTY is transferred to the dev team. 
 
     - Each token in the winning faction's bounty, will serve as a
-    claim on the FINAL_BOUNTY * 0.67, proportional to (TOTAL_BOUNTY/TOKEN_BOUNTY).
+    claim on the (FINAL_BOUNTY * 0.67), proportional to (TOTAL_BOUNTY/TOKEN_BOUNTY).
 
     FIN.
 
@@ -489,10 +491,20 @@ contract Remilio64 is ERC721A, Ownable {
         the project.
         - EMERGENT METAS FROM COMMUNITY, WHO KNOWS WHAT THESE WILL BE.
 
+    NOTES:
+        - The WAR will open with a specific cutoff time and date. This will not
+          be modifiable. PERIOD. IT IS PROGRAMMED.
+        - NO NEW ACTIONS will be permitted after the CUTOFF DATE.
+        - CLAIMS will only be open after the CUTOFF DATE.
+        - DEV will ONLY be able to access 33% stake once CUT OFF DATE IS REACHED.
+        - Any funds in FINAL_BOUNTY will ONLY be accessible to Rem64 claims. Dev
+          can never access these. As such there's a chance some ether is locked away 
+          permanently from never be claimed.
     */
 
     /// -------------------------------------
     /// ❌ Game Ownership Revoking
+    ///     true gentleman shit™️
     /// -------------------------------------
 
     bool gameOwnershipRevoked = false;
