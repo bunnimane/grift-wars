@@ -689,7 +689,19 @@ contract Remilio64 is ERC721A, Ownable {
         _;
     }
 
-    function startWar(uint256 endingDate) public onlyOwner warOff {
+    modifier warNeverStarted() {
+        if (endDate != 0) {
+            revert WarStarted();
+        }
+        _;
+    }
+
+    function startWar(uint256 endingDate)
+        public
+        onlyOwner
+        warOff
+        warNeverStarted
+    {
         startDate = block.timestamp;
         endDate = endingDate;
         war = true;
@@ -698,6 +710,19 @@ contract Remilio64 is ERC721A, Ownable {
     /// -------------------------------------
     /// 💣 WAR ENDED
     /// -------------------------------------
+
+    // PUBLIC function anyone can call to end the
+    // war. BUT it has to be called after the
+    // official end date, and only if the war
+    // is still on going. Consider this a
+    // public service should dev team be unable
+    // to call off the war.
+
+    function endWarOfficially() public warOn {
+        if (war == true && block.timestamp > endDate) {
+            war = false;
+        }
+    }
 
     function withdrawWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
