@@ -24,6 +24,7 @@ error PaidTooMuch();
 // War not started
 error WarNotStarted();
 error WarStarted();
+error WarOver();
 
 contract Remilio64 is ERC721A, Ownable {
     // Contracts for free mints
@@ -610,6 +611,7 @@ contract Remilio64 is ERC721A, Ownable {
         public
         payable
         warOn
+        warNotOver
         checkAlive(shotta)
         checkAlive(target)
         minShotPrice(msg.value)
@@ -666,14 +668,16 @@ contract Remilio64 is ERC721A, Ownable {
     uint256 startDate;
     uint256 endDate;
 
-    // This won't work
     modifier warOn() {
-        if (block.timestamp > endDate) {
-            war = false;
-            return;
-        }
         if (war == false) {
             revert WarNotStarted();
+        }
+        _;
+    }
+
+    modifier warNotOver() {
+        if (war == true && block.timestamp > endDate) {
+            revert WarOver();
         }
         _;
     }
