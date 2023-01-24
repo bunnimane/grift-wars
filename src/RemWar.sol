@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./IRem64.sol";
 
 // Game Ownership
-error GameOwnerRevoked();
+error TestModeOff();
 
 // Rem alive status
 error RemDead();
@@ -103,25 +103,30 @@ contract RemWar is Ownable {
         - 
     */
 
-    /// -------------------------------------
-    /// ❌ Game Ownership Revoking
-    ///     true gentleman shit™️
-    /// -------------------------------------
-
+    // Initialization and constructor
     IRem64 Rem64;
 
-    bool gameOwnershipRevoked = false;
+    constructor(address rem64Address) {
+        Rem64 = IRem64(rem64Address);
+    }
 
-    modifier gameOwnerRevoked() {
-        if (gameOwnershipRevoked == true) {
-            revert GameOwnerRevoked();
+    /// -------------------------------------
+    /// ❌ Test Mode is just for automated
+    ///    testing.
+    /// -------------------------------------
+
+    bool testModeOff = false;
+
+    modifier notTestMode() {
+        if (testModeOff == true) {
+            revert TestModeOff();
         }
         _;
     }
 
     // One way function, rip 🪦
-    function revokeGameOwnership() public onlyOwner {
-        gameOwnershipRevoked = true;
+    function disableTestMode() public onlyOwner {
+        testModeOff = true;
     }
 
     /// -------------------------------------
@@ -136,7 +141,7 @@ contract RemWar is Ownable {
     }
 
     // Owner override for killing Rem64, used for testing.
-    function killRem(uint256 tokenId) public onlyOwner gameOwnerRevoked {
+    function killRem(uint256 tokenId) public onlyOwner notTestMode {
         remAlive[tokenId] = false;
     }
 
@@ -163,7 +168,7 @@ contract RemWar is Ownable {
     function changeRemBounty(uint256 tokenId, uint256 bounty)
         public
         onlyOwner
-        gameOwnerRevoked
+        notTestMode
     {
         remBounty[tokenId] = bounty;
     }
@@ -353,7 +358,21 @@ contract RemWar is Ownable {
         _;
     }
 
-    function soldierClaim(uint256 tokenId) public warOff tokenWon(tokenId) {
+    mapping(uint256 => bool) public soldierClaimed;
+
+    modifier soldierClaimedCheck(uint256 tokenId) {
+        if (soldierClaimed[tokenId] == true) {
+            revert("Soldier already claimed");
+        }
+        _;
+    }
+
+    function soldierClaim(uint256 tokenId)
+        public
+        warOff
+        tokenWon(tokenId)
+        soldierClaimedCheck(tokenId)
+    {
         require(address(this).balance > 0, "Nothing to release");
 
         uint256 faction = Rem64.getFaction(tokenId);
@@ -368,7 +387,8 @@ contract RemWar is Ownable {
             value: withdrawAmount
         }("");
 
-        remBounty[tokenId] = 0;
+        soldierClaimed[tokenId] = true;
+
         require(success, "withdraw failed");
     }
 }

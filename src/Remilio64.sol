@@ -13,21 +13,6 @@ error MaxSupplyExceeded();
 error TooManyMinted();
 error PublicMintClosed();
 
-// Game Ownership
-error GameOwnerRevoked();
-
-// Rem alive status
-error RemDead();
-
-// Shot Price Checker
-error InvalidShotPrice();
-error PaidTooMuch();
-
-// War not started
-error WarNotStarted();
-error WarStarted();
-error WarOver();
-
 contract Remilio64 is ERC721A, Ownable {
     // Contracts for free mints
     address dollady = 0x233580FE8E1985127D1DaCF2a9EE342049b0Dad8;
@@ -127,6 +112,7 @@ contract Remilio64 is ERC721A, Ownable {
     // give a somewhat equal distribution of factions to a
     // minter. This means FACTION MAXI's will have to go to
     // secondary to get factions they want.
+
     function subtractFromRandomFaction(uint256 totalminted)
         public
         returns (uint256 faction)
@@ -258,6 +244,8 @@ contract Remilio64 is ERC721A, Ownable {
         mintOpened = tf;
     }
 
+    uint256[] priceTiers = [0.001 ether, 0.005 ether];
+
     function mint(uint256 quantity)
         external
         payable
@@ -267,11 +255,14 @@ contract Remilio64 is ERC721A, Ownable {
     {
         if (totalSupply() <= 999) {
             require(
-                msg.value == 0.001 ether * quantity,
+                msg.value == priceTiers[0] * quantity,
                 "The price is invalid"
             );
         } else if (totalSupply() > 999) {
-            require(msg.value == price * quantity, "The price is invalid");
+            require(
+                msg.value == priceTiers[1] * quantity,
+                "The price is invalid"
+            );
         }
 
         mint_and_gen(quantity);
@@ -415,12 +406,12 @@ contract Remilio64 is ERC721A, Ownable {
     /// if players aren't minting.
     /// -------------------------------------
 
-    function getPrice() public view returns (uint256) {
-        return price;
+    function getPrice() public view returns (uint256[] memory) {
+        return priceTiers;
     }
 
-    function changePrice(uint256 _price) public onlyOwner {
-        price = _price;
+    function changePrice(uint256 index, uint256 _price) public onlyOwner {
+        priceTiers[index] = _price;
     }
 
     /// -------------------------------------

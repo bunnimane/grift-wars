@@ -51,14 +51,15 @@ contract FomoFugitiveTest is Test {
     }
 
     function testMintOverflow() public {
+        uint256[] memory prices = _Remilio64.getPrice();
         // First Tier
         for (uint256 i = 0; i <= 999; i++) {
-            _Remilio64.mint{value: 0.001 ether}(1);
+            _Remilio64.mint{value: prices[0]}(1);
         }
 
         // Second Tier
         for (uint256 i = 0; i <= 8999; i++) {
-            _Remilio64.mint{value: _Remilio64.getPrice()}(1);
+            _Remilio64.mint{value: prices[1]}(1);
         }
 
         assertEq(_Remilio64.totalSupply(), 10000);
@@ -152,14 +153,16 @@ contract FomoFugitiveTest is Test {
     function testChangePrice() public {
         uint256 newPrice = 0.01888 ether;
         // Change price as owner
-        _Remilio64.changePrice(newPrice);
-        assertEq(_Remilio64.getPrice(), newPrice);
-        _Remilio64.changePrice(newPrice * 2);
-        assertEq(_Remilio64.getPrice(), newPrice * 2);
+        _Remilio64.changePrice(0, newPrice);
+        uint256[] memory prices = _Remilio64.getPrice();
+        assertEq(prices[0], newPrice);
+        _Remilio64.changePrice(1, newPrice * 2);
+        prices = _Remilio64.getPrice();
+        assertEq(prices[1], newPrice * 2);
         // Check that only owner can change price
         vm.prank(someUser);
         vm.expectRevert("Ownable: caller is not the owner");
-        _Remilio64.changePrice(0.001 ether);
+        _Remilio64.changePrice(0, 0.001 ether);
     }
 
     /// -----------------------------------------------------------------------
