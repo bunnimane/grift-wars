@@ -78,11 +78,13 @@ contract FomoFugitiveTest is Test {
     }
 
     function testWlMint() public {
+        _Remilio64.setWlStatus(true);
         _Remilio64.wl_mint(1);
         assertEq(_Remilio64.getFreeTokens(), 999);
     }
 
     function testWlMintLimit() public {
+        _Remilio64.setWlStatus(true);
         for (uint256 i = 0; i <= 999; i++) {
             _Remilio64.wl_mint(1);
         }

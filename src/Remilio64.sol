@@ -294,7 +294,7 @@ contract Remilio64 is ERC721A, Ownable {
     }
 
     // Toggle for wl
-    bool wlOn = true;
+    bool wlOn = false;
 
     function setWlStatus(bool tf) public onlyOwner {
         wlOn = tf;
