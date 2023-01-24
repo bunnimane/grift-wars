@@ -1,4 +1,5 @@
-// SPDX-tokenFactionLicense-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// IRem64 Contracts v0.2
 
 pragma solidity ^0.8.12;
 

@@ -1,4 +1,6 @@
-// SPDX-tokenFactionLicense-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// RemWar Contracts v0.2
+
 pragma solidity ^0.8.12;
 
 import "@ERC721A/ERC721A.sol";
