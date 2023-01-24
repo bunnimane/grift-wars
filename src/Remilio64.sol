@@ -333,16 +333,29 @@ contract Remilio64 is ERC721A, Ownable {
 
     // Mapping to keep track of wallet mints
     mapping(address => uint256) walletMints;
+    uint256 maxWlWalletMints = 5;
+    uint256 maxWlQuantity = 5;
+
+    function setWlwalletLimit(uint256 x) public onlyOwner {
+        maxWlWalletMints = x;
+    }
+
+    function setWlQuantity(uint256 x) public onlyOwner {
+        maxWlQuantity = x;
+    }
 
     function wl_mint(uint256 quantity) public maxSupplyCheck(quantity) {
         require(freeTokens > 0, "No Free Mints Left");
 
         if (!testMode) {
             require(
-                walletMints[msg.sender] <= 5,
+                walletMints[msg.sender] <= maxWlWalletMints,
                 "Max Per Wallet Reached Already"
             );
-            require(quantity <= 5, "Max Per Wallet Reached Already");
+            require(
+                quantity <= maxWlQuantity,
+                "Max Per Wallet Reached Already"
+            );
             uint256 friendTokens = checkFriendCollections(address(msg.sender));
             if (friendTokens == 0) {
                 revert NoQualifyingTokens();
