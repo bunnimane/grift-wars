@@ -125,6 +125,8 @@ contract RemWar is Ownable {
     /// -------------------------------------
     /// 😵 Alive Or Dead
     /// -------------------------------------
+
+    //ToDo: figure out what default value is and name accordingly;
     mapping(uint256 => bool) public remAlive;
 
     function getRemAlive(uint256 tokenId) public view returns (bool) {
