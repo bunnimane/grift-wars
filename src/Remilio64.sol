@@ -13,6 +13,8 @@ error MaxSupplyExceeded();
 error TooManyMinted();
 error PublicMintClosed();
 
+error NoQualifyingTokens();
+
 contract Remilio64 is ERC721A, Ownable {
     // Contracts for free mints
     address dollady = 0x233580FE8E1985127D1DaCF2a9EE342049b0Dad8;
@@ -23,7 +25,8 @@ contract Remilio64 is ERC721A, Ownable {
     // Supply and Price info
     uint64 public immutable _maxSupply = 10000;
     uint256 public price = 0.007 ether;
-    uint256 public maxPerMint = 30;
+    uint256 public maxPerMint = 10;
+    uint256 maxPerWallet = 30;
 
     /// -------------------------------------
     /// 🦹 FACTIONS
@@ -96,6 +99,10 @@ contract Remilio64 is ERC721A, Ownable {
 
     function getFaction(uint256 tokenId) public view returns (uint256) {
         return tokenFaction[tokenId];
+    }
+
+    function setFaction(uint256 tokenId, uint256 faction) public onlyOwner {
+        tokenFaction[tokenId] = faction;
     }
 
     // Human readable
@@ -210,7 +217,17 @@ contract Remilio64 is ERC721A, Ownable {
     /// 🪙 MINT MODIFIERS
     /// -------------------------------------
 
+    // This is set to true for testing for convenience
+    bool testMode = false;
+
+    function setTestMode(bool tf) public onlyOwner {
+        testMode = tf;
+    }
+
     modifier quantityCheck(uint256 quantity) {
+        if (!testMode) {
+            require(balanceOf(msg.sender) < 30, "Wallet Max Reached");
+        }
         if (quantity > maxPerMint) {
             revert TooManyMinted();
         }
@@ -269,68 +286,69 @@ contract Remilio64 is ERC721A, Ownable {
     }
 
     /// -------------------------------------
-    /// 🪆 DOLLADY
+    /// 🪆 Friends Mint
     /// -------------------------------------
 
-    mapping(address => bool) public dolladyMinted;
+    uint256 freeTokens = 1000;
 
-    bool public dolladyMintOpened = true;
-
-    function getDolladyMintOpened() public view returns (bool) {
-        return dolladyMintOpened;
+    function getFreeTokens() public view returns (uint256) {
+        return freeTokens;
     }
 
-    function setDolladyMintOpened(bool tf) public onlyOwner {
-        dolladyMintOpened = tf;
+    // Toggle for wl
+    bool wlOn = true;
+
+    function setWlStatus(bool tf) public onlyOwner {
+        wlOn = tf;
     }
 
-    function mint_with_dollady() external payable {
-        require(dolladyMinted[msg.sender] != true, "Wallet Already Minted");
-        // get quantity
-        uint256 quantity = remilioContract.balanceOf(msg.sender);
-        require(quantity * 4 <= maxPerMint, "Too Many Minted");
-        if (totalSupply() + quantity > _maxSupply) {
-            revert MaxSupplyExceeded();
+    // Friend collections
+    bool public dolladyOn = true;
+
+    bool public remilioOn = true;
+
+    // Toggles for friend collections
+
+    function setDolladyWl(bool tf) public onlyOwner {
+        dolladyOn = tf;
+    }
+
+    function setRemilioWl(bool tf) public onlyOwner {
+        remilioOn = tf;
+    }
+
+    // Helper function to see if on WL
+    function checkFriendCollections(address sender)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 total = 0;
+        if (dolladyOn) {
+            total += dolladyContract.balanceOf(sender);
         }
-
-        mint_and_gen(quantity * 2);
-        dolladyMinted[msg.sender] = true;
+        if (remilioOn) {
+            total += remilioContract.balanceOf(sender);
+        }
+        return total;
     }
 
-    /// -------------------------------------
-    /// 🪙 REMILIO
-    ///     I put a flag here to turn off
-    ///     remilio minting, they said
-    ///     they would promo if I allow it,
-    ///     but if that falls through I turn
-    ///     it off 🧀🐀 never truss an anon 🐍
-    ///     https://imgur.com/a/32uVYSI
-    /// -------------------------------------
+    function wl_mint(uint256 quantity)
+        public
+        quantityCheck(quantity)
+        maxSupplyCheck(quantity)
+    {
+        require(freeTokens > 0, "No Free Mints Left");
 
-    mapping(address => bool) public remilioMinted;
-
-    bool public remilioMintOpened = true;
-
-    function getRemilioMintOpened() public view returns (bool) {
-        return remilioMintOpened;
-    }
-
-    function setRemilioMintOpened(bool tf) public onlyOwner {
-        remilioMintOpened = tf;
-    }
-
-    function mint_with_remilio() external payable publicMintCheck {
-        require(remilioMintOpened == true, "Remilio Mint Closed");
-        require(remilioMinted[msg.sender] != true, "Wallet Already Minted");
-        // get quantity
-        uint256 quantity = remilioContract.balanceOf(msg.sender);
-        require(quantity <= maxPerMint, "Too Many Minted");
-        if (totalSupply() + quantity > _maxSupply) {
-            revert MaxSupplyExceeded();
+        if (!testMode) {
+            uint256 friendTokens = checkFriendCollections(address(msg.sender));
+            if (friendTokens == 0) {
+                revert NoQualifyingTokens();
+            }
         }
 
         mint_and_gen(quantity);
-        remilioMinted[msg.sender] = true;
+        freeTokens -= quantity;
     }
 
     /// -------------------------------------
@@ -349,8 +367,6 @@ contract Remilio64 is ERC721A, Ownable {
     /// -------------------------------------
     /// 🪙 OWNER MINT
     /// -------------------------------------
-
-    bool public ownerMinted = false;
 
     function ownerMint(uint256 quantity)
         external

@@ -31,6 +31,8 @@ contract FomoFugitiveTest is Test {
         uint256 privateKey = vm.deriveKey(mnemonic, 0);
         someUser = vm.addr(privateKey);
         _Remilio64.setMintOpened(true);
+        // Used to override modifiers
+        _Remilio64.setTestMode(true);
     }
 
     /// -----------------------------------------------------------------------
@@ -75,6 +77,26 @@ contract FomoFugitiveTest is Test {
         _Remilio64.mint{value: 0 ether}(1);
     }
 
+    function testWlMint() public {
+        _Remilio64.wl_mint(1);
+        assertEq(_Remilio64.getFreeTokens(), 999);
+    }
+
+    function testWlMintLimit() public {
+        for (uint256 i = 0; i <= 999; i++) {
+            _Remilio64.wl_mint(1);
+        }
+        assertEq(_Remilio64.getFreeTokens(), 0);
+        vm.expectRevert("No Free Mints Left");
+        _Remilio64.wl_mint(1);
+    }
+
+    function testWlMintNoFriends() public {
+        _Remilio64.setTestMode(false);
+        vm.expectRevert();
+        _Remilio64.wl_mint(1);
+    }
+
     /// -----------------------------------------------------------------------
     /// FACTIONS
     /// -----------------------------------------------------------------------
@@ -91,6 +113,21 @@ contract FomoFugitiveTest is Test {
         assertEq(_Remilio64.getIrishMob(), 1000);
         assertEq(_Remilio64.getAlbanianMafia(), 1000);
         assertEq(_Remilio64.getHellsAngels(), 1000);
+    }
+
+    function testSetFaction() public {
+        _Remilio64.mint{value: 0.001 ether}(1);
+        _Remilio64.setFaction(0, 3);
+        assertEq(_Remilio64.getFaction(0), 3);
+        _Remilio64.setFaction(0, 2);
+        assertEq(_Remilio64.getFaction(0), 2);
+    }
+
+    function testSetFactionAsNotOwner() public {
+        _Remilio64.mint{value: 0.001 ether}(1);
+        vm.prank(someUser);
+        vm.expectRevert("Ownable: caller is not the owner");
+        _Remilio64.setFaction(0, 3);
     }
 
     /// -----------------------------------------------------------------------
@@ -180,6 +217,16 @@ contract FomoFugitiveTest is Test {
                 "/2"
             )
         );
+    }
+
+    /// -------------------------------------
+    /// 🔫 Test Mode
+    /// -------------------------------------
+
+    function testTestModeAsNotOwner() public {
+        vm.prank(someUser);
+        vm.expectRevert("Ownable: caller is not the owner");
+        _Remilio64.setTestMode(true);
     }
 
     /// -------------------------------------
