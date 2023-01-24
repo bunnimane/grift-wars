@@ -449,7 +449,7 @@ contract Remilio64 is ERC721A, Ownable {
 
     - Each ALIVE Remilio64 can shoot someone with ether.
 
-    - MIN bullet cost is 0.0005Ξ FOR SANITY.
+    - MIN bullet cost is 0.001Ξ FOR SANITY.
 
     - IF an ALIVE Remilio64 (A) is shot by an ALIVE REMILIO (B):
         - IF A's bounty is 0, it is DEAD. B's bounty increases
@@ -505,6 +505,16 @@ contract Remilio64 is ERC721A, Ownable {
         - Any funds in FINAL_BOUNTY will ONLY be accessible to Rem64 claims. Dev
           can never access these. As such there's a chance some ether is locked away 
           permanently from never be claimed.
+
+
+
+
+    RANDOM IDEAS:
+        - If player attacked and not killed, dmg dealt should be 50%. This disincentivizes
+          a group of small players from attacking a 'whale'.
+        - Should be able to reinforce an ally. This will 'donate' bounty. This is useful for
+          protecting whales, or 'storing faction value'.
+        - 
     */
 
     /// -------------------------------------
@@ -588,7 +598,7 @@ contract Remilio64 is ERC721A, Ownable {
     }
 
     modifier minShotPrice(uint256 shotPrice) {
-        if (shotPrice < 0.0005 ether) {
+        if (shotPrice < 0.001 ether) {
             revert InvalidShotPrice();
         }
         _;
@@ -618,7 +628,9 @@ contract Remilio64 is ERC721A, Ownable {
     {
         uint256 shotPrice = msg.value;
 
-        FINAL_BOUNTY += shotPrice;
+        //Split payment
+        FINAL_BOUNTY += (shotPrice * 67) / 100;
+        DEV_TOTAL += (shotPrice * 33) / 100;
 
         // Initial check to see if rem
         // is instantly killed.
@@ -720,7 +732,10 @@ contract Remilio64 is ERC721A, Ownable {
     // public service should dev team be unable
     // to call off the war.
 
+    // Variables to hold the paid totals for withdrawal;
     uint256 FINAL_BOUNTY;
+
+    uint256 DEV_TOTAL;
 
     function endWarOfficially() public warOn {
         if (war == true && block.timestamp > endDate) {
@@ -730,10 +745,7 @@ contract Remilio64 is ERC721A, Ownable {
 
     function withdrawDevWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
-
-        uint256 withdrawAmount = ((FINAL_BOUNTY * 33) / 100);
-        (bool success, ) = payable(owner()).call{value: withdrawAmount}("");
-        FINAL_BOUNTY -= withdrawAmount;
+        (bool success, ) = payable(owner()).call{value: DEV_TOTAL}("");
         require(success, "withdraw failed");
     }
 
@@ -766,7 +778,6 @@ contract Remilio64 is ERC721A, Ownable {
             value: withdrawAmount
         }("");
 
-        FINAL_BOUNTY -= withdrawAmount;
         remBounty[tokenId] = 0;
         require(success, "withdraw failed");
     }
