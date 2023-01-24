@@ -3,10 +3,12 @@ pragma solidity ^0.8.12;
 
 import "../lib/forge-std/src/Test.sol";
 import "../src/Remilio64.sol";
+import "../src/RemWar.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract FomoFugitiveTest is Test {
     Remilio64 _Remilio64;
+    RemWar _RemWar;
     address owner;
     address someUser;
     uint256 public price;
@@ -25,6 +27,8 @@ contract FomoFugitiveTest is Test {
         owner = address(this);
         price = 0.005 ether;
         _Remilio64 = new Remilio64();
+        _RemWar = new RemWar(address(_Remilio64));
+        vm.deal(_RemWar.owner(), 300 ether);
         vm.deal(_Remilio64.owner(), 300 ether);
         string
             memory mnemonic = "test test test test test test test test test test test junk";
@@ -238,26 +242,55 @@ contract FomoFugitiveTest is Test {
     function testAllRemsAlive() public {
         testMintOverflow(); // mint max
         for (uint256 i = 0; i < 9999; ++i) {
-            //assertEq(_Remilio64.getRemAlive(i), true);
+            assertEq(_RemWar.getRemDead(i), false);
         }
     }
 
     function testAllRemsBounties() public {
         testMintOverflow(); // mint max
         for (uint256 i = 0; i < 9999; ++i) {
-            //assertEq(_Remilio64.getRemBounty(i), 0);
+            assertEq(_RemWar.getRemBounty(i), 0);
         }
     }
 
     function testKillRem() public {
         testMintOverflow(); // mint max
-        //_Remilio64.killRem(1);
+        _RemWar.killRem(1);
         for (uint256 i = 0; i < 9999; ++i) {
             if (i == 1) {
-                //assertEq(_Remilio64.getRemAlive(i), false);
+                assertEq(_RemWar.getRemDead(i), true);
             } else {
-                //assertEq(_Remilio64.getRemAlive(i), true);
+                assertEq(_RemWar.getRemDead(i), false);
             }
         }
+    }
+
+    function testRemKillNew() public {
+        testMintSuccess();
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        _RemWar.shootRem{value: 0.001 ether}(0, 1);
+        assertEq(_RemWar.getRemBounty(0), 0.001 ether);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(0), false);
+        uint256 faction = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction), 0.001 ether);
+    }
+
+    function testRemKillWithBounty() public {
+        testMintSuccess();
+        testMintSuccess();
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        _RemWar.shootRem{value: 0.001 ether}(0, 1);
+        _RemWar.shootRem{value: 0.001 ether}(2, 0);
+        assertEq(_RemWar.getRemBounty(0), 0 ether);
+        assertEq(_RemWar.getRemBounty(1), 0 ether);
+        assertEq(_RemWar.getRemBounty(2), 0.002 ether);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(0), true);
+        assertEq(_RemWar.getRemDead(2), false);
+        uint256 faction1 = _Remilio64.getFaction(2);
+        uint256 faction2 = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction1), 0.002 ether);
+        assertEq(_RemWar.getFactionBounty(faction2), 0 ether);
     }
 }

@@ -134,20 +134,20 @@ contract RemWar is Ownable {
     /// -------------------------------------
 
     //ToDo: figure out what default value is and name accordingly;
-    mapping(uint256 => bool) public remAlive;
+    mapping(uint256 => bool) public remDead;
 
-    function getRemAlive(uint256 tokenId) public view returns (bool) {
-        return remAlive[tokenId];
+    function getRemDead(uint256 tokenId) public view returns (bool) {
+        return remDead[tokenId];
     }
 
     // Owner override for killing Rem64, used for testing.
     function killRem(uint256 tokenId) public onlyOwner notTestMode {
-        remAlive[tokenId] = false;
+        remDead[tokenId] = true;
     }
 
     // Function to kill Rem64 fr fr
     function killRemFr(uint256 tokenId) private {
-        remAlive[tokenId] = false;
+        remDead[tokenId] = true;
     }
 
     /// -------------------------------------
@@ -157,11 +157,15 @@ contract RemWar is Ownable {
     // Token Bounty
     mapping(uint256 => uint256) public remBounty;
 
+    function getRemBounty(uint256 tokenId) public view returns (uint256) {
+        return remBounty[tokenId];
+    }
+
     // Faction Bounty
     uint256[] public factionBounty = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-    function getRemBounty(uint256 tokenId) public view returns (uint256) {
-        return remBounty[tokenId];
+    function getFactionBounty(uint256 index) public view returns (uint256) {
+        return factionBounty[index];
     }
 
     // Owner override for checking RemBounty, used for testing.
@@ -186,7 +190,7 @@ contract RemWar is Ownable {
 
     // MODIFIERS FOR SHOOTING
     modifier checkAlive(uint256 tokenId) {
-        if (remAlive[tokenId] == false) {
+        if (remDead[tokenId] == true) {
             revert RemDead();
         }
         _;
@@ -260,7 +264,7 @@ contract RemWar is Ownable {
             // Headshot 🎯
             if (remBounty[target] == shotPrice) {
                 subFromBounty(target, shotPrice);
-                addToBounty(shotta, shotPrice);
+                addToBounty(shotta, shotPrice*2);
                 killRemFr(target);
                 killCount[shotta] += 1;
                 emit Killed(shotta, target);
