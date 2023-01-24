@@ -199,10 +199,8 @@ contract Remilio64 is ERC721A, Ownable {
     /// 🪙 MINTING
     /// -------------------------------------
     //    - 0.0046Ξ~ avg mint
-    //      - Twitter interactions WL'd
-    //      - Dollady holders get 5 free per dollady in wallet.
-    //      - Remilio holders get up to 1 free per remilio in wallet.
-    //      - first  1000 mints are 0.001Ξ
+    //      - Dollady and Remilio are WL'd
+    //      - first  1000 mints are 0.003Ξ
     //      - last 9000 mints are 0.005Ξ
     //      - max 30 per tx
     //
@@ -333,22 +331,27 @@ contract Remilio64 is ERC721A, Ownable {
         return total;
     }
 
-    function wl_mint(uint256 quantity)
-        public
-        quantityCheck(quantity)
-        maxSupplyCheck(quantity)
-    {
+    // Mapping to keep track of wallet mints
+    mapping(address => uint256) walletMints;
+
+    function wl_mint(uint256 quantity) public maxSupplyCheck(quantity) {
         require(freeTokens > 0, "No Free Mints Left");
 
         if (!testMode) {
+            require(
+                walletMints[msg.sender] <= 5,
+                "Max Per Wallet Reached Already"
+            );
+            require(quantity <= 5, "Max Per Wallet Reached Already");
             uint256 friendTokens = checkFriendCollections(address(msg.sender));
             if (friendTokens == 0) {
                 revert NoQualifyingTokens();
             }
         }
 
-        mint_and_gen(quantity);
         freeTokens -= quantity;
+        walletMints[msg.sender] += quantity;
+        mint_and_gen(quantity);
     }
 
     /// -------------------------------------
