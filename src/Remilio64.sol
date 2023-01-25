@@ -24,7 +24,6 @@ contract Remilio64 is ERC721A, Ownable {
 
     // Supply and Price info
     uint64 public immutable _maxSupply = 10000;
-    uint256 public price = 0.007 ether;
     uint256 public maxPerMint = 10;
     uint256 maxPerWallet = 30;
 
@@ -259,7 +258,9 @@ contract Remilio64 is ERC721A, Ownable {
         mintOpened = tf;
     }
 
-    uint256[] priceTiers = [0.001 ether, 0.005 ether];
+    uint256[] priceTiers = [0.002 ether, 0.004 ether];
+
+    mapping(address => bool) claimedFreeToken;
 
     function mint(uint256 quantity)
         external
@@ -268,6 +269,18 @@ contract Remilio64 is ERC721A, Ownable {
         maxSupplyCheck(quantity)
         publicMintCheck
     {
+        if (msg.value == 0 ether) {
+            require(
+                claimedFreeToken[msg.sender] == false,
+                "Already Free Minted"
+            );
+            require(quantity == 1, "Can only mint 1 free");
+            require(freeTokens > 0, "No Free Mints Left");
+            mint_and_gen(1);
+            claimedFreeToken[msg.sender] = true;
+            freeTokens -= 1;
+            return;
+        }
         if (totalSupply() <= 999) {
             require(
                 msg.value == priceTiers[0] * quantity,
@@ -333,8 +346,8 @@ contract Remilio64 is ERC721A, Ownable {
 
     // Mapping to keep track of wallet mints
     mapping(address => uint256) walletMints;
-    uint256 maxWlWalletMints = 5;
-    uint256 maxWlQuantity = 5;
+    uint256 maxWlWalletMints = 10;
+    uint256 maxWlQuantity = 10;
 
     function setWlwalletLimit(uint256 x) public onlyOwner {
         maxWlWalletMints = x;

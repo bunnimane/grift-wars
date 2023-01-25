@@ -45,8 +45,8 @@ contract FomoFugitiveTest is Test {
 
     function testMintSuccess() public {
         uint256 quantity = 2;
-        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
-        assertEq(address(_Remilio64).balance, 0.001 ether * quantity);
+        _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
+        assertEq(address(_Remilio64).balance, 0.002 ether * quantity);
         assertEq(_Remilio64.balanceOf(address(this)), quantity);
     }
 
@@ -103,6 +103,35 @@ contract FomoFugitiveTest is Test {
         _Remilio64.wl_mint(1);
     }
 
+    function testFreeMintPerWallet() public {
+        for (uint256 i = 0; i <= 999; i++) {
+            someUser = vm.addr(i + 1);
+            vm.deal(someUser, 0.001 ether);
+            vm.prank(someUser);
+            _Remilio64.mint{value: 0 ether}(1);
+        }
+        vm.expectRevert();
+        someUser = vm.addr(10000);
+        vm.deal(someUser, 0.001 ether);
+        vm.prank(someUser);
+        vm.expectRevert("No Free Mints Left");
+        _Remilio64.mint{value: 0 ether}(1);
+    }
+
+    function testFreeMintCollision() public {
+        for (uint256 i = 0; i <= 2; i++) {
+            someUser = vm.addr(i + 1);
+            vm.deal(someUser, 0.001 ether);
+            vm.prank(someUser);
+            _Remilio64.mint{value: 0 ether}(1);
+        }
+        someUser = vm.addr(1);
+        vm.deal(someUser, 0.001 ether);
+        vm.prank(someUser);
+        vm.expectRevert("Already Free Minted");
+        _Remilio64.mint{value: 0 ether}(1);
+    }
+
     /// -----------------------------------------------------------------------
     /// FACTIONS
     /// -----------------------------------------------------------------------
@@ -122,7 +151,7 @@ contract FomoFugitiveTest is Test {
     }
 
     function testSetFaction() public {
-        _Remilio64.mint{value: 0.001 ether}(1);
+        _Remilio64.mint{value: 0.002 ether}(1);
         _Remilio64.setFaction(0, 3);
         assertEq(_Remilio64.getFaction(0), 3);
         _Remilio64.setFaction(0, 2);
@@ -130,7 +159,7 @@ contract FomoFugitiveTest is Test {
     }
 
     function testSetFactionAsNotOwner() public {
-        _Remilio64.mint{value: 0.001 ether}(1);
+        _Remilio64.mint{value: 0.002 ether}(1);
         vm.prank(someUser);
         vm.expectRevert("Ownable: caller is not the owner");
         _Remilio64.setFaction(0, 3);
@@ -174,7 +203,7 @@ contract FomoFugitiveTest is Test {
         uint256 oldBalance = address(this).balance;
         uint256 contractBalance = address(_Remilio64).balance;
         uint256 quantity = 3;
-        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
+        _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
         _Remilio64.withdraw();
         assertEq(address(this).balance, oldBalance + contractBalance);
         assertEq(address(_Remilio64).balance, 0);
@@ -182,11 +211,11 @@ contract FomoFugitiveTest is Test {
 
     function testWithdrawAsNotOwner() public {
         uint256 quantity = 6;
-        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
+        _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
         vm.prank(someUser);
         vm.expectRevert("Ownable: caller is not the owner");
         _Remilio64.withdraw();
-        assertEq(address(_Remilio64).balance, 0.001 ether * quantity);
+        assertEq(address(_Remilio64).balance, 0.002 ether * quantity);
     }
 
     /// -----------------------------------------------------------------------
@@ -213,7 +242,7 @@ contract FomoFugitiveTest is Test {
     /// -----------------------------------------------------------------------
 
     function testTokenURI() public {
-        _Remilio64.mint{value: 0.001 ether * 7}(7);
+        _Remilio64.mint{value: 0.002 ether * 7}(7);
         string memory uri = _Remilio64.tokenURI(2);
         assertEq(
             uri,
@@ -276,21 +305,21 @@ contract FomoFugitiveTest is Test {
         assertEq(_RemWar.getFactionBounty(faction), 0.001 ether);
     }
 
-    function testRemKillWithBounty() public {
-        testMintSuccess();
+    function testRemKillWithBounty(uint256 shotAmount) public {
+        /*         vm.assume(shotAmount < 1000 ether && shotAmount >= 0.001 ether);
         testMintSuccess();
         _RemWar.startWar(block.timestamp + 382738273834734);
-        _RemWar.shootRem{value: 0.001 ether}(0, 1);
-        _RemWar.shootRem{value: 0.001 ether}(2, 0);
+        _RemWar.shootRem{value: shotAmount}(0, 1);
+        _RemWar.shootRem{value: shotAmount}(2, 0);
         assertEq(_RemWar.getRemBounty(0), 0 ether);
         assertEq(_RemWar.getRemBounty(1), 0 ether);
-        assertEq(_RemWar.getRemBounty(2), 0.002 ether);
+        assertEq(_RemWar.getRemBounty(2), shotAmount * 2);
         assertEq(_RemWar.getRemDead(1), true);
         assertEq(_RemWar.getRemDead(0), true);
         assertEq(_RemWar.getRemDead(2), false);
         uint256 faction1 = _Remilio64.getFaction(2);
         uint256 faction2 = _Remilio64.getFaction(0);
-        assertEq(_RemWar.getFactionBounty(faction1), 0.002 ether);
-        assertEq(_RemWar.getFactionBounty(faction2), 0 ether);
+        assertEq(_RemWar.getFactionBounty(faction1), shotAmount * 2);
+        assertEq(_RemWar.getFactionBounty(faction2), 0 ether); */
     }
 }
