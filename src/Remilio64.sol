@@ -259,6 +259,10 @@ contract Remilio64 is ERC721A, Ownable {
 
     mapping(address => bool) claimedFreeToken;
 
+    function noMoreFreeMints(address user) public view returns (bool) {
+        return claimedFreeToken[user] || (freeTokens == 0);
+    }
+
     function mint(uint256 quantity)
         external
         payable
@@ -269,11 +273,10 @@ contract Remilio64 is ERC721A, Ownable {
         // Free Mint Per Wallet
         if (msg.value == 0 ether) {
             require(
-                claimedFreeToken[msg.sender] == false,
-                "Already Free Minted"
+                noMoreFreeMints(msg.sender) == false,
+                "Free Mint Unavailable"
             );
             require(quantity == 1, "Can only mint 1 free");
-            require(freeTokens > 0, "No Free Mints Left");
             mint_and_gen(1);
             claimedFreeToken[msg.sender] = true;
             freeTokens -= 1;

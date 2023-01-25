@@ -128,7 +128,7 @@ contract FomoFugitiveTest is Test {
         someUser = vm.addr(1);
         vm.deal(someUser, 0.001 ether);
         vm.prank(someUser);
-        vm.expectRevert("Already Free Minted");
+        vm.expectRevert("Free Mint Unavailable");
         _Remilio64.mint{value: 0 ether}(1);
     }
 
