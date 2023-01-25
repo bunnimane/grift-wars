@@ -45,7 +45,7 @@ else if (is.mac && is.ns4) {
 }
 /*
      FILE ARCHIVED ON 22:36:39 Aug 02, 2002 AND RETRIEVED FROM THE
-     INTERNET ARCHIVE ON 05:12:13 Jan 25, 2023.
+     INTERNET ARCHIVE ON 06:00:34 Jan 21, 2023.
      JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
 
      ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
@@ -53,14 +53,14 @@ else if (is.mac && is.ns4) {
 */
 /*
 playback timings (ms):
-  captures_list: 81.127
-  exclusion.robots: 0.077
-  exclusion.robots.policy: 0.069
-  RedisCDXSource: 18.774
-  esindex: 0.01
-  LoadShardBlock: 39.571 (3)
-  PetaboxLoader3.datanode: 91.927 (4)
-  CDXLines.iter: 19.398 (3)
-  load_resource: 103.599
-  PetaboxLoader3.resolve: 34.58
+  captures_list: 365.955
+  exclusion.robots: 0.065
+  exclusion.robots.policy: 0.06
+  cdx.remote: 0.056
+  esindex: 0.008
+  LoadShardBlock: 267.646 (3)
+  PetaboxLoader3.datanode: 298.919 (4)
+  CDXLines.iter: 18.172 (3)
+  load_resource: 99.26
+  PetaboxLoader3.resolve: 23.598
 */

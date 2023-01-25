@@ -115,7 +115,7 @@ if(pageLoc.indexOf('games') != -1){
 }
 /*
      FILE ARCHIVED ON 23:09:48 Aug 02, 2002 AND RETRIEVED FROM THE
-     INTERNET ARCHIVE ON 05:12:13 Jan 25, 2023.
+     INTERNET ARCHIVE ON 06:00:33 Jan 21, 2023.
      JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
 
      ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
@@ -123,14 +123,14 @@ if(pageLoc.indexOf('games') != -1){
 */
 /*
 playback timings (ms):
-  captures_list: 125.863
-  exclusion.robots: 0.082
-  exclusion.robots.policy: 0.074
-  cdx.remote: 0.067
-  esindex: 0.009
-  LoadShardBlock: 89.944 (3)
-  PetaboxLoader3.datanode: 104.791 (4)
-  CDXLines.iter: 21.05 (3)
-  load_resource: 123.792
-  PetaboxLoader3.resolve: 37.078
+  captures_list: 77.543
+  exclusion.robots: 0.072
+  exclusion.robots.policy: 0.065
+  RedisCDXSource: 0.579
+  esindex: 0.007
+  LoadShardBlock: 59.742 (3)
+  PetaboxLoader3.datanode: 81.911 (4)
+  CDXLines.iter: 14.987 (3)
+  load_resource: 85.987
+  PetaboxLoader3.resolve: 41.344
 */

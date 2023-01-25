@@ -168,7 +168,7 @@ function isWindowPopup(win) {
 }
 /*
      FILE ARCHIVED ON 22:14:30 Aug 02, 2002 AND RETRIEVED FROM THE
-     INTERNET ARCHIVE ON 05:12:14 Jan 25, 2023.
+     INTERNET ARCHIVE ON 06:00:33 Jan 21, 2023.
      JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
 
      ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
@@ -176,14 +176,14 @@ function isWindowPopup(win) {
 */
 /*
 playback timings (ms):
-  captures_list: 130.608
-  exclusion.robots: 0.14
-  exclusion.robots.policy: 0.13
-  cdx.remote: 0.076
-  esindex: 0.011
-  LoadShardBlock: 93.134 (3)
-  PetaboxLoader3.datanode: 99.033 (4)
-  CDXLines.iter: 27.2 (3)
-  load_resource: 60.932
-  PetaboxLoader3.resolve: 26.807
+  captures_list: 118.483
+  exclusion.robots: 0.064
+  exclusion.robots.policy: 0.059
+  cdx.remote: 0.04
+  esindex: 0.005
+  LoadShardBlock: 79.91 (3)
+  PetaboxLoader3.datanode: 92.522 (4)
+  CDXLines.iter: 14.28 (3)
+  load_resource: 89.033
+  PetaboxLoader3.resolve: 35.342
 */
