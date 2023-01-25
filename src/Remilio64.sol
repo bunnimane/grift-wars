@@ -281,12 +281,12 @@ contract Remilio64 is ERC721A, Ownable {
             freeTokens -= 1;
             return;
         }
-        if (totalSupply() <= 999) {
+        if (totalSupply() <= 4999) {
             require(
                 msg.value == priceTiers[0] * quantity,
                 "The price is invalid"
             );
-        } else if (totalSupply() > 999) {
+        } else if (totalSupply() > 4999) {
             require(
                 msg.value == priceTiers[1] * quantity,
                 "The price is invalid"

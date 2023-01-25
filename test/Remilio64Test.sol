@@ -59,12 +59,12 @@ contract FomoFugitiveTest is Test {
     function testMintOverflow() public {
         uint256[] memory prices = _Remilio64.getPrice();
         // First Tier
-        for (uint256 i = 0; i <= 999; i++) {
+        for (uint256 i = 0; i <= 4999; i++) {
             _Remilio64.mint{value: prices[0]}(1);
         }
 
         // Second Tier
-        for (uint256 i = 0; i <= 8999; i++) {
+        for (uint256 i = 5000; i <= 9999; i++) {
             _Remilio64.mint{value: prices[1]}(1);
         }
 
