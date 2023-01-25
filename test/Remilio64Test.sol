@@ -305,8 +305,9 @@ contract FomoFugitiveTest is Test {
         assertEq(_RemWar.getFactionBounty(faction), 0.001 ether);
     }
 
-    function testRemKillWithBounty(uint256 shotAmount) public {
-        /*         vm.assume(shotAmount < 1000 ether && shotAmount >= 0.001 ether);
+    function testRemKillWithBounty() public {
+        ///vm.assume(shotAmount < 1000 ether && shotAmount >= 0.001 ether);
+        uint256 shotAmount = 0.001 ether;
         testMintSuccess();
         _RemWar.startWar(block.timestamp + 382738273834734);
         _RemWar.shootRem{value: shotAmount}(0, 1);
@@ -320,6 +321,6 @@ contract FomoFugitiveTest is Test {
         uint256 faction1 = _Remilio64.getFaction(2);
         uint256 faction2 = _Remilio64.getFaction(0);
         assertEq(_RemWar.getFactionBounty(faction1), shotAmount * 2);
-        assertEq(_RemWar.getFactionBounty(faction2), 0 ether); */
+        assertEq(_RemWar.getFactionBounty(faction2), 0 ether);
     }
 }

@@ -197,11 +197,8 @@ contract Remilio64 is ERC721A, Ownable {
     /// -------------------------------------
     /// 🪙 MINTING
     /// -------------------------------------
-    //    - 0.0046Ξ~ avg mint
+    //    - 0.003Ξ~ avg mint
     //      - Dollady and Remilio are WL'd
-    //      - first  1000 mints are 0.003Ξ
-    //      - last 9000 mints are 0.005Ξ
-    //      - max 30 per tx
     //
     // ℹ️ - Be aware that some minters could
     //     could get remilio64s at the prev
@@ -269,6 +266,7 @@ contract Remilio64 is ERC721A, Ownable {
         maxSupplyCheck(quantity)
         publicMintCheck
     {
+        // Free Mint Per Wallet
         if (msg.value == 0 ether) {
             require(
                 claimedFreeToken[msg.sender] == false,
@@ -281,6 +279,8 @@ contract Remilio64 is ERC721A, Ownable {
             freeTokens -= 1;
             return;
         }
+
+        // Regular Public Mint
         if (totalSupply() <= 4999) {
             require(
                 msg.value == priceTiers[0] * quantity,
