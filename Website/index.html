@@ -13,7 +13,11 @@
       const accounts = web3.eth.accounts;
 
       // Connect to the MetaMask wallet
-      window.ethereum.enable();
+      window.ethereum.enable().then(function () {
+         web3.eth.getAccounts(function (err, accounts) {
+            const accountAddress = accounts[0];
+         });
+      });
 
       // The address of the smart contract that will mint the NFT
       const contractAddress = "0x233580FE8E1985127D1DaCF2a9EE342049b0Dad8";
@@ -26,7 +30,6 @@
         const contract = new web3.eth.Contract(contractABI, contractAddress);
         resolve(contract);
       });
-
 
       // Mint the collection
       function mint() {
@@ -73,6 +76,10 @@
               })
         });
       }
+
+      window.addEventListener('load', function () {
+            getBalance();
+         })
     </script>
 
     <script
@@ -112,7 +119,7 @@
       src="./_ Nintendo __files/window.js.download"
     ></script>
   </head>
-  <body onload="initRollovers(); " style="background-color: #dedede">
+  <body style="background-color: #dedede">
     <!-- BEGIN WAYBACK TOOLBAR INSERT -->
     <style type="text/css">
       body {
@@ -464,9 +471,6 @@
         </tr>
       </tbody>
     </table>
-    <script>
-      adjustNav();
-    </script>
     <map name="marionav">
       <area
         shape="poly"
@@ -616,7 +620,7 @@
             />
           </td>
           <td width="55">
-            <a href="#">
+            <a href="https://twitter.com/home">
               <img
                 src="./_ Nintendo __files/preview_contact.gif"
                 width="55"
@@ -1276,8 +1280,7 @@
                                         class="minime"
                                         style="text-decoration: none"
                                       >
-                                        Nintendo's Mario Searches Nationwide for
-                                        Teens Who "SHiNE"
+                                      The Grift is thickening and scientists don't know why.
                                       </span>
                                     </a>
                                   </td>
@@ -1319,13 +1322,12 @@
                                       height="1"
                                     />
                                     <br />
-                                    <a href="#">
+                                    <a href="https://twitter.com/remilio64/status/1617812392616005632">
                                       <span
                                         class="minime"
                                         style="text-decoration: none"
                                       >
-                                        EA Signs Pierce Brosnan to 'Star' In
-                                        Game
+                                       Rem64 Officially announces an announcement of an announcement.
                                       </span>
                                     </a>
                                   </td>
@@ -1367,13 +1369,12 @@
                                       height="1"
                                     />
                                     <br />
-                                    <a href="#">
+                                    <a href="https://twitter.com/remilio64/status/1618175060577259522">
                                       <span
                                         class="minime"
                                         style="text-decoration: none"
                                       >
-                                        Infogrames Announces Driver 3 for
-                                        Nintendo GameCube
+                                       1 Weird trick to work harder.
                                       </span>
                                     </a>
                                   </td>
@@ -1415,14 +1416,12 @@
                                       height="1"
                                     />
                                     <br />
-                                    <a href="#">
+                                    <a href="https://twitter.com/remilio64/status/1618145728081317888">
                                       <span
                                         class="minime"
                                         style="text-decoration: none"
                                       >
-                                        Electronic Arts Announces a new way to
-                                        go Off-Road With Shox for Nintendo
-                                        GameCube
+                                        You won't believe what these single ladies in your area are doing.
                                       </span>
                                     </a>
                                   </td>
@@ -1468,8 +1467,7 @@
                                         class="minime"
                                         style="text-decoration: none"
                                       >
-                                        THQ And Fox Interactive Announce Game
-                                        Boy Advance Publishing Agreement
+                                        Long Covid: How the psyop just keeps on grifting.
                                       </span>
                                     </a>
                                   </td>

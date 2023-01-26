@@ -180,6 +180,10 @@ contract Remilio64 is ERC721A, Ownable {
         "ipfs://bafybeig7jmw2nbbmbjhthyhscleq66gab5ivliwdlu6kwnetrxiemktll4/";
     string private baseURI = "http://127.0.0.1:8000/json/";
 
+    function setImageURI(string calldata uri) public onlyOwner {
+        imgURI = uri;
+    }
+
     constructor() ERC721A("Remilio64", "R64") {
         // Set Faction names for readability
         factionNames[0] = "Italian Mafia";
@@ -420,10 +424,28 @@ contract Remilio64 is ERC721A, Ownable {
         tokenFaction[totalminted] = subtractFromRandomFaction(totalminted);
     }
 
+    bool tokenDynamic = true;
+
+    function setTokenDynamic(bool tf) public onlyOwner {
+        tokenDynamic = tf;
+    }
+
     function tokenURI(uint256 tokenId)
         public
         view
         override(ERC721A)
+        returns (string memory)
+    {
+        if (tokenDynamic) {
+            return tokenDynamicURI(tokenId);
+        } else {
+            return tokenStaticURI(tokenId);
+        }
+    }
+
+    function tokenDynamicURI(uint256 tokenId)
+        private
+        view
         returns (string memory)
     {
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
@@ -431,6 +453,37 @@ contract Remilio64 is ERC721A, Ownable {
         return
             string(
                 abi.encodePacked(baseURI, factionName, "/", _toString(tokenId))
+            );
+    }
+
+    function tokenStaticURI(uint256 tokenId)
+        private
+        view
+        returns (string memory)
+    {
+        string storage factionName = factionNames[tokenFaction[tokenId]];
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        abi.encodePacked(
+                            '{"name": "Remilio 64 # ',
+                            _toString(tokenId),
+                            '", "image": "',
+                            imgURI,
+                            _toString(tokenId),
+                            ".png",
+                            '",',
+                            '"attributes": [',
+                            '{"faction": "',
+                            factionName,
+                            '"',
+                            "}]}"
+                        )
+                    )
+                )
             );
     }
 
