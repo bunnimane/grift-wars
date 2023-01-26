@@ -474,7 +474,7 @@ contract Remilio64 is ERC721A, Ownable {
                             '", "image": "',
                             imgURI,
                             _toString(tokenId),
-                            ".png",
+                            ".jpg",
                             '",',
                             '"attributes": [',
                             '{"faction": "',
