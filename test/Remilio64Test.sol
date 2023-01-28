@@ -3,10 +3,12 @@ pragma solidity ^0.8.12;
 
 import "../lib/forge-std/src/Test.sol";
 import "../src/Remilio64.sol";
+import "../src/RemWar.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract FomoFugitiveTest is Test {
     Remilio64 _Remilio64;
+    RemWar _RemWar;
     address owner;
     address someUser;
     uint256 public price;
@@ -25,12 +27,16 @@ contract FomoFugitiveTest is Test {
         owner = address(this);
         price = 0.005 ether;
         _Remilio64 = new Remilio64();
+        _RemWar = new RemWar(address(_Remilio64));
+        vm.deal(_RemWar.owner(), 300 ether);
         vm.deal(_Remilio64.owner(), 300 ether);
         string
             memory mnemonic = "test test test test test test test test test test test junk";
         uint256 privateKey = vm.deriveKey(mnemonic, 0);
         someUser = vm.addr(privateKey);
         _Remilio64.setMintOpened(true);
+        // Used to override modifiers
+        _Remilio64.setTestMode(true);
     }
 
     /// -----------------------------------------------------------------------
@@ -39,8 +45,8 @@ contract FomoFugitiveTest is Test {
 
     function testMintSuccess() public {
         uint256 quantity = 2;
-        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
-        assertEq(address(_Remilio64).balance, 0.001 ether * quantity);
+        _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
+        assertEq(address(_Remilio64).balance, 0.002 ether * quantity);
         assertEq(_Remilio64.balanceOf(address(this)), quantity);
     }
 
@@ -51,14 +57,15 @@ contract FomoFugitiveTest is Test {
     }
 
     function testMintOverflow() public {
+        uint256[] memory prices = _Remilio64.getPrice();
         // First Tier
-        for (uint256 i = 0; i <= 999; i++) {
-            _Remilio64.mint{value: 0.001 ether}(1);
+        for (uint256 i = 0; i <= 4999; i++) {
+            _Remilio64.mint{value: prices[0]}(1);
         }
 
         // Second Tier
-        for (uint256 i = 0; i <= 8999; i++) {
-            _Remilio64.mint{value: _Remilio64.getPrice()}(1);
+        for (uint256 i = 5000; i <= 9999; i++) {
+            _Remilio64.mint{value: prices[1]}(1);
         }
 
         assertEq(_Remilio64.totalSupply(), 10000);
@@ -71,6 +78,57 @@ contract FomoFugitiveTest is Test {
         _Remilio64.setMintOpened(false);
 
         vm.expectRevert(PublicMintClosed.selector);
+        _Remilio64.mint{value: 0 ether}(1);
+    }
+
+    function testWlMint() public {
+        _Remilio64.setWlStatus(true);
+        _Remilio64.wl_mint(1);
+        assertEq(_Remilio64.getFreeTokens(), 999);
+    }
+
+    function testWlMintLimit() public {
+        _Remilio64.setWlStatus(true);
+        for (uint256 i = 0; i <= 999; i++) {
+            _Remilio64.wl_mint(1);
+        }
+        assertEq(_Remilio64.getFreeTokens(), 0);
+        vm.expectRevert("No Free Mints Left");
+        _Remilio64.wl_mint(1);
+    }
+
+    function testWlMintNoFriends() public {
+        _Remilio64.setTestMode(false);
+        vm.expectRevert();
+        _Remilio64.wl_mint(1);
+    }
+
+    function testFreeMintPerWallet() public {
+        for (uint256 i = 0; i <= 999; i++) {
+            someUser = vm.addr(i + 1);
+            vm.deal(someUser, 0.001 ether);
+            vm.prank(someUser);
+            _Remilio64.mint{value: 0 ether}(1);
+        }
+        vm.expectRevert();
+        someUser = vm.addr(10000);
+        vm.deal(someUser, 0.001 ether);
+        vm.prank(someUser);
+        vm.expectRevert("No Free Mints Left");
+        _Remilio64.mint{value: 0 ether}(1);
+    }
+
+    function testFreeMintCollision() public {
+        for (uint256 i = 0; i <= 2; i++) {
+            someUser = vm.addr(i + 1);
+            vm.deal(someUser, 0.001 ether);
+            vm.prank(someUser);
+            _Remilio64.mint{value: 0 ether}(1);
+        }
+        someUser = vm.addr(1);
+        vm.deal(someUser, 0.001 ether);
+        vm.prank(someUser);
+        vm.expectRevert("Free Mint Unavailable");
         _Remilio64.mint{value: 0 ether}(1);
     }
 
@@ -90,6 +148,21 @@ contract FomoFugitiveTest is Test {
         assertEq(_Remilio64.getIrishMob(), 1000);
         assertEq(_Remilio64.getAlbanianMafia(), 1000);
         assertEq(_Remilio64.getHellsAngels(), 1000);
+    }
+
+    function testSetFaction() public {
+        _Remilio64.mint{value: 0.002 ether}(1);
+        _Remilio64.setFaction(0, 3);
+        assertEq(_Remilio64.getFaction(0), 3);
+        _Remilio64.setFaction(0, 2);
+        assertEq(_Remilio64.getFaction(0), 2);
+    }
+
+    function testSetFactionAsNotOwner() public {
+        _Remilio64.mint{value: 0.002 ether}(1);
+        vm.prank(someUser);
+        vm.expectRevert("Ownable: caller is not the owner");
+        _Remilio64.setFaction(0, 3);
     }
 
     /// -----------------------------------------------------------------------
@@ -130,7 +203,7 @@ contract FomoFugitiveTest is Test {
         uint256 oldBalance = address(this).balance;
         uint256 contractBalance = address(_Remilio64).balance;
         uint256 quantity = 3;
-        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
+        _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
         _Remilio64.withdraw();
         assertEq(address(this).balance, oldBalance + contractBalance);
         assertEq(address(_Remilio64).balance, 0);
@@ -138,11 +211,11 @@ contract FomoFugitiveTest is Test {
 
     function testWithdrawAsNotOwner() public {
         uint256 quantity = 6;
-        _Remilio64.mint{value: 0.001 ether * quantity}(quantity);
+        _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
         vm.prank(someUser);
         vm.expectRevert("Ownable: caller is not the owner");
         _Remilio64.withdraw();
-        assertEq(address(_Remilio64).balance, 0.001 ether * quantity);
+        assertEq(address(_Remilio64).balance, 0.002 ether * quantity);
     }
 
     /// -----------------------------------------------------------------------
@@ -152,14 +225,16 @@ contract FomoFugitiveTest is Test {
     function testChangePrice() public {
         uint256 newPrice = 0.01888 ether;
         // Change price as owner
-        _Remilio64.changePrice(newPrice);
-        assertEq(_Remilio64.getPrice(), newPrice);
-        _Remilio64.changePrice(newPrice * 2);
-        assertEq(_Remilio64.getPrice(), newPrice * 2);
+        _Remilio64.changePrice(0, newPrice);
+        uint256[] memory prices = _Remilio64.getPrice();
+        assertEq(prices[0], newPrice);
+        _Remilio64.changePrice(1, newPrice * 2);
+        prices = _Remilio64.getPrice();
+        assertEq(prices[1], newPrice * 2);
         // Check that only owner can change price
         vm.prank(someUser);
         vm.expectRevert("Ownable: caller is not the owner");
-        _Remilio64.changePrice(0.001 ether);
+        _Remilio64.changePrice(0, 0.001 ether);
     }
 
     /// -----------------------------------------------------------------------
@@ -167,7 +242,7 @@ contract FomoFugitiveTest is Test {
     /// -----------------------------------------------------------------------
 
     function testTokenURI() public {
-        _Remilio64.mint{value: 0.001 ether * 7}(7);
+        _Remilio64.mint{value: 0.002 ether * 7}(7);
         string memory uri = _Remilio64.tokenURI(2);
         assertEq(
             uri,
@@ -180,32 +255,72 @@ contract FomoFugitiveTest is Test {
     }
 
     /// -------------------------------------
+    /// 🔫 Test Mode
+    /// -------------------------------------
+
+    function testTestModeAsNotOwner() public {
+        vm.prank(someUser);
+        vm.expectRevert("Ownable: caller is not the owner");
+        _Remilio64.setTestMode(true);
+    }
+
+    /// -------------------------------------
     /// 🔫 Rem64 Wars TESTING SUITE
     /// -------------------------------------
 
     function testAllRemsAlive() public {
         testMintOverflow(); // mint max
         for (uint256 i = 0; i < 9999; ++i) {
-            assertEq(_Remilio64.getRemAlive(i), true);
+            assertEq(_RemWar.getRemDead(i), false);
         }
     }
 
     function testAllRemsBounties() public {
         testMintOverflow(); // mint max
         for (uint256 i = 0; i < 9999; ++i) {
-            assertEq(_Remilio64.getRemBounty(i), 0);
+            assertEq(_RemWar.getRemBounty(i), 0);
         }
     }
 
     function testKillRem() public {
         testMintOverflow(); // mint max
-        _Remilio64.killRem(1);
+        _RemWar.killRem(1);
         for (uint256 i = 0; i < 9999; ++i) {
             if (i == 1) {
-                assertEq(_Remilio64.getRemAlive(i), false);
+                assertEq(_RemWar.getRemDead(i), true);
             } else {
-                assertEq(_Remilio64.getRemAlive(i), true);
+                assertEq(_RemWar.getRemDead(i), false);
             }
         }
+    }
+
+    function testRemKillNew() public {
+        testMintSuccess();
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        _RemWar.shootRem{value: 0.001 ether}(0, 1);
+        assertEq(_RemWar.getRemBounty(0), 0.001 ether);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(0), false);
+        uint256 faction = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction), 0.001 ether);
+    }
+
+    function testRemKillWithBounty() public {
+        ///vm.assume(shotAmount < 1000 ether && shotAmount >= 0.001 ether);
+        uint256 shotAmount = 0.001 ether;
+        testMintSuccess();
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        _RemWar.shootRem{value: shotAmount}(0, 1);
+        _RemWar.shootRem{value: shotAmount}(2, 0);
+        assertEq(_RemWar.getRemBounty(0), 0 ether);
+        assertEq(_RemWar.getRemBounty(1), 0 ether);
+        assertEq(_RemWar.getRemBounty(2), shotAmount * 2);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(0), true);
+        assertEq(_RemWar.getRemDead(2), false);
+        uint256 faction1 = _Remilio64.getFaction(2);
+        uint256 faction2 = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction1), shotAmount * 2);
+        assertEq(_RemWar.getFactionBounty(faction2), 0 ether);
     }
 }

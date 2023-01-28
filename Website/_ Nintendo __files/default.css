@@ -1,0 +1,209 @@
+body {
+   background-color: #dedede;
+   color: #333333;
+   font-family: verdana, arial, sans-serif;
+   font-size: 11px;}
+
+td {
+   color: #333333;
+   font-family: verdana, arial, sans-serif;
+   font-size: 11px;}
+
+input {
+   font-family: verdana, arial, sans-serif;
+   font-size: 9px;}
+
+h2{
+   color: #333333;
+   font-family: verdana, arial, sans-serif;
+   font-size: 12px;}
+
+a:link {
+	color: #000000;
+  }
+
+a:visited {
+	color: #000000;}
+	
+sup {
+	font-size: 8px;}	
+  
+.main {
+  	font-size: 11px;
+	line-height: 15px;}  
+  
+.form{
+	font-family: verdana, arial, sans-serif;
+	font-size:10px;
+}
+ 
+.normaltext {
+	color: #333333;
+	font-family: verdana, arial, sans-serif;
+	font-size: 10px;
+	line-height: 10px;
+  }
+  
+.drevil {
+	font-family: verdana, arial, sans-serif;
+	font-size: 10px;
+	line-height: 12px;} 
+
+.scottevil {
+	font-family: verdana, arial, sans-serif;
+	font-size: 10px;
+	line-height: 14px;} 
+  
+.minime {
+   font-size: 9px;
+   line-height: 11px;}
+
+.header {
+	color: #333333;
+	fontSize: 11px;
+	font-weight: bold;
+  }
+  
+.whiteheader {
+	font-size: 11px;
+	font-weight: bold;
+	color: #dedede;
+  }
+  
+.gamesheader {
+	font-size: 11px;
+	font-weight: bold;
+  }
+   
+.gamestext {
+	font-size: 10px;
+	line-height: 11px;
+	}  
+         
+.headline {
+	font-size: 9px;
+	line-height: 11px;
+  	text-decoration: none;
+  }      
+ 
+.newsheader {
+	font-size: 15px;
+	font-weight: bold;
+	color: #dedede;}	
+       
+.newstitle {
+	font-size:16px;
+	color: #000000;
+	font-family: verdana, arial, sans-serif;
+	font-weight : bold;}
+	
+.newsauthor {
+	color: #000000;
+	font-family: verdana, arial, sans-serif;
+	font-style : italic;
+	font-weight : bold;}
+
+.newsdate{
+	color: #000000;
+	font-family: verdana, arial, sans-serif;
+	font-style : italic;
+	font-weight : bold;}
+		
+.bignumber {
+	font-size: 14px;
+	font-weight: bold;
+	color: #dedede;}	
+  
+.light {
+
+	background-color: #9fbee6;}
+	
+.medium {
+
+	background-color: #7a8aba;}	
+	
+.dark {
+
+	background-color: #3d4f97}	
+	
+.grey {
+
+	color: #CCCCCC;}
+	
+.lightgrey {
+
+	color: #6d6d6d;}	
+	
+.bg_darkgrey {
+
+	background-color: #585E6A;}	
+	
+.bg_medgrey {
+
+	background-color: #90949C;}	
+	
+.bg_lightgrey {
+
+	background-color: #f1f1f1;}		
+	
+.white {
+	color: #DEDEDE;}
+	
+.loginwhite {
+
+	color: #ecb22a;
+	text-decoration: none;}	
+	
+.loginyellow {
+	color: #f1ab27;
+	font-family: verdana, sans-serif;
+	text-decoration: none;}
+	
+.realwhite {
+
+	color: #ffffff;}
+
+.black {
+
+	color: #000000;}
+	
+ 
+.indent {margin:10px;}
+
+.indent7 {margin:7px;}	
+
+.newsteaser
+	{color: #7A8ABA;
+	font-weight:bold;
+	font-family:verdana;
+	font-size:11px}
+	
+.mediumgrey
+{color:#999999;}
+
+.mediumlight
+{background-color:#8AA1D3;}
+
+.screenshot
+{border-color: #5A5E6C;}
+/*
+     FILE ARCHIVED ON 14:00:33 Jun 01, 2002 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 06:00:35 Jan 21, 2023.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  captures_list: 142.435
+  exclusion.robots: 0.08
+  exclusion.robots.policy: 0.072
+  cdx.remote: 0.06
+  esindex: 0.008
+  LoadShardBlock: 114.847 (3)
+  PetaboxLoader3.datanode: 1245.474 (4)
+  CDXLines.iter: 17.398 (3)
+  load_resource: 1262.429
+  PetaboxLoader3.resolve: 71.796
+*/

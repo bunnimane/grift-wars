@@ -1,4 +1,6 @@
-// SPDX-tokenFactionLicense-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// RemWar Contracts v0.2
+
 pragma solidity ^0.8.12;
 
 import "@ERC721A/ERC721A.sol";
@@ -11,20 +13,7 @@ error MaxSupplyExceeded();
 error TooManyMinted();
 error PublicMintClosed();
 
-// Game Ownership
-error GameOwnerRevoked();
-
-// Rem alive status
-error RemDead();
-
-// Shot Price Checker
-error InvalidShotPrice();
-error PaidTooMuch();
-
-// War not started
-error WarNotStarted();
-error WarStarted();
-error WarOver();
+error NoQualifyingTokens();
 
 contract Remilio64 is ERC721A, Ownable {
     // Contracts for free mints
@@ -35,8 +24,8 @@ contract Remilio64 is ERC721A, Ownable {
 
     // Supply and Price info
     uint64 public immutable _maxSupply = 10000;
-    uint256 public price = 0.007 ether;
-    uint256 public maxPerMint = 30;
+    uint256 public maxPerMint = 10;
+    uint256 maxPerWallet = 30;
 
     /// -------------------------------------
     /// 🦹 FACTIONS
@@ -111,6 +100,10 @@ contract Remilio64 is ERC721A, Ownable {
         return tokenFaction[tokenId];
     }
 
+    function setFaction(uint256 tokenId, uint256 faction) public onlyOwner {
+        tokenFaction[tokenId] = faction;
+    }
+
     // Human readable
     function getFactionString(uint256 key) public view returns (string memory) {
         return getFactionName(getFaction(key));
@@ -125,6 +118,7 @@ contract Remilio64 is ERC721A, Ownable {
     // give a somewhat equal distribution of factions to a
     // minter. This means FACTION MAXI's will have to go to
     // secondary to get factions they want.
+
     function subtractFromRandomFaction(uint256 totalminted)
         public
         returns (uint256 faction)
@@ -186,6 +180,10 @@ contract Remilio64 is ERC721A, Ownable {
         "ipfs://bafybeig7jmw2nbbmbjhthyhscleq66gab5ivliwdlu6kwnetrxiemktll4/";
     string private baseURI = "http://127.0.0.1:8000/json/";
 
+    function setImageURI(string calldata uri) public onlyOwner {
+        imgURI = uri;
+    }
+
     constructor() ERC721A("Remilio64", "R64") {
         // Set Faction names for readability
         factionNames[0] = "Italian Mafia";
@@ -203,13 +201,8 @@ contract Remilio64 is ERC721A, Ownable {
     /// -------------------------------------
     /// 🪙 MINTING
     /// -------------------------------------
-    //    - 0.0046Ξ~ avg mint
-    //      - Twitter interactions WL'd
-    //      - Dollady holders get 5 free per dollady in wallet.
-    //      - Remilio holders get up to 1 free per remilio in wallet.
-    //      - first  1000 mints are 0.001Ξ
-    //      - last 9000 mints are 0.005Ξ
-    //      - max 30 per tx
+    //    - 0.003Ξ~ avg mint
+    //      - Dollady and Remilio are WL'd
     //
     // ℹ️ - Be aware that some minters could
     //     could get remilio64s at the prev
@@ -222,7 +215,17 @@ contract Remilio64 is ERC721A, Ownable {
     /// 🪙 MINT MODIFIERS
     /// -------------------------------------
 
+    // This is set to true for testing for convenience
+    bool testMode = false;
+
+    function setTestMode(bool tf) public onlyOwner {
+        testMode = tf;
+    }
+
     modifier quantityCheck(uint256 quantity) {
+        if (!testMode) {
+            require(balanceOf(msg.sender) < 30, "Wallet Max Reached");
+        }
         if (quantity > maxPerMint) {
             revert TooManyMinted();
         }
@@ -256,6 +259,14 @@ contract Remilio64 is ERC721A, Ownable {
         mintOpened = tf;
     }
 
+    uint256[] priceTiers = [0.002 ether, 0.004 ether];
+
+    mapping(address => bool) claimedFreeToken;
+
+    function noMoreFreeMints(address user) public view returns (bool) {
+        return claimedFreeToken[user] || (freeTokens == 0);
+    }
+
     function mint(uint256 quantity)
         external
         payable
@@ -263,81 +274,117 @@ contract Remilio64 is ERC721A, Ownable {
         maxSupplyCheck(quantity)
         publicMintCheck
     {
-        if (totalSupply() <= 999) {
+        // Free Mint Per Wallet
+        if (msg.value == 0 ether) {
             require(
-                msg.value == 0.001 ether * quantity,
+                noMoreFreeMints(msg.sender) == false,
+                "Free Mint Unavailable"
+            );
+            require(quantity == 1, "Can only mint 1 free");
+            mint_and_gen(1);
+            claimedFreeToken[msg.sender] = true;
+            freeTokens -= 1;
+            return;
+        }
+
+        // Regular Public Mint
+        if (totalSupply() <= 4999) {
+            require(
+                msg.value == priceTiers[0] * quantity,
                 "The price is invalid"
             );
-        } else if (totalSupply() > 999) {
-            require(msg.value == price * quantity, "The price is invalid");
+        } else if (totalSupply() > 4999) {
+            require(
+                msg.value == priceTiers[1] * quantity,
+                "The price is invalid"
+            );
         }
 
         mint_and_gen(quantity);
     }
 
     /// -------------------------------------
-    /// 🪆 DOLLADY
+    /// 🪆 Friends Mint
     /// -------------------------------------
 
-    mapping(address => bool) public dolladyMinted;
+    uint256 freeTokens = 1000;
 
-    bool public dolladyMintOpened = true;
-
-    function getDolladyMintOpened() public view returns (bool) {
-        return dolladyMintOpened;
+    function getFreeTokens() public view returns (uint256) {
+        return freeTokens;
     }
 
-    function setDolladyMintOpened(bool tf) public onlyOwner {
-        dolladyMintOpened = tf;
+    // Toggle for wl
+    bool wlOn = false;
+
+    function setWlStatus(bool tf) public onlyOwner {
+        wlOn = tf;
     }
 
-    function mint_with_dollady() external payable {
-        require(dolladyMinted[msg.sender] != true, "Wallet Already Minted");
-        // get quantity
-        uint256 quantity = remilioContract.balanceOf(msg.sender);
-        require(quantity * 4 <= maxPerMint, "Too Many Minted");
-        if (totalSupply() + quantity > _maxSupply) {
-            revert MaxSupplyExceeded();
+    // Friend collections
+    bool public dolladyOn = true;
+
+    bool public remilioOn = true;
+
+    // Toggles for friend collections
+
+    function setDolladyWl(bool tf) public onlyOwner {
+        dolladyOn = tf;
+    }
+
+    function setRemilioWl(bool tf) public onlyOwner {
+        remilioOn = tf;
+    }
+
+    // Helper function to see if on WL
+    function checkFriendCollections(address sender)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 total = 0;
+        if (dolladyOn) {
+            total += dolladyContract.balanceOf(sender);
+        }
+        if (remilioOn) {
+            total += remilioContract.balanceOf(sender);
+        }
+        return total;
+    }
+
+    // Mapping to keep track of wallet mints
+    mapping(address => uint256) walletMints;
+    uint256 maxWlWalletMints = 10;
+    uint256 maxWlQuantity = 10;
+
+    function setWlwalletLimit(uint256 x) public onlyOwner {
+        maxWlWalletMints = x;
+    }
+
+    function setWlQuantity(uint256 x) public onlyOwner {
+        maxWlQuantity = x;
+    }
+
+    function wl_mint(uint256 quantity) public maxSupplyCheck(quantity) {
+        require(freeTokens > 0, "No Free Mints Left");
+
+        if (!testMode) {
+            require(
+                walletMints[msg.sender] <= maxWlWalletMints,
+                "Max Per Wallet Reached Already"
+            );
+            require(
+                quantity <= maxWlQuantity,
+                "Max Per Wallet Reached Already"
+            );
+            uint256 friendTokens = checkFriendCollections(address(msg.sender));
+            if (friendTokens == 0) {
+                revert NoQualifyingTokens();
+            }
         }
 
-        mint_and_gen(quantity * 2);
-        dolladyMinted[msg.sender] = true;
-    }
-
-    /// -------------------------------------
-    /// 🪙 REMILIO
-    ///     I put a flag here to turn off
-    ///     remilio minting, they said
-    ///     they would promo if I allow it,
-    ///     but if that falls through I turn
-    ///     it off 🧀🐀 never truss an anon 🐍
-    ///     https://imgur.com/a/32uVYSI
-    /// -------------------------------------
-
-    mapping(address => bool) public remilioMinted;
-
-    bool public remilioMintOpened = true;
-
-    function getRemilioMintOpened() public view returns (bool) {
-        return remilioMintOpened;
-    }
-
-    function setRemilioMintOpened(bool tf) public onlyOwner {
-        remilioMintOpened = tf;
-    }
-
-    function mint_with_remilio() external payable publicMintCheck {
-        require(remilioMintOpened == true, "Remilio Mint Closed");
-        require(remilioMinted[msg.sender] != true, "Wallet Already Minted");
-        // get quantity
-        uint256 quantity = remilioContract.balanceOf(msg.sender);
-        require(quantity <= maxPerMint, "Too Many Minted");
-        if (totalSupply() + quantity > _maxSupply) {
-            revert MaxSupplyExceeded();
-        }
-
+        freeTokens -= quantity;
+        walletMints[msg.sender] += quantity;
         mint_and_gen(quantity);
-        remilioMinted[msg.sender] = true;
     }
 
     /// -------------------------------------
@@ -357,8 +404,6 @@ contract Remilio64 is ERC721A, Ownable {
     /// 🪙 OWNER MINT
     /// -------------------------------------
 
-    bool public ownerMinted = false;
-
     function ownerMint(uint256 quantity)
         external
         onlyOwner
@@ -377,8 +422,12 @@ contract Remilio64 is ERC721A, Ownable {
 
     function createDNA(uint256 totalminted) private {
         tokenFaction[totalminted] = subtractFromRandomFaction(totalminted);
-        remAlive[totalminted] = true;
-        remBounty[totalminted] = 0 ether;
+    }
+
+    bool tokenDynamic = true;
+
+    function setTokenDynamic(bool tf) public onlyOwner {
+        tokenDynamic = tf;
     }
 
     function tokenURI(uint256 tokenId)
@@ -387,11 +436,54 @@ contract Remilio64 is ERC721A, Ownable {
         override(ERC721A)
         returns (string memory)
     {
+        if (tokenDynamic) {
+            return tokenDynamicURI(tokenId);
+        } else {
+            return tokenStaticURI(tokenId);
+        }
+    }
+
+    function tokenDynamicURI(uint256 tokenId)
+        private
+        view
+        returns (string memory)
+    {
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
         string storage factionName = factionNames[tokenFaction[tokenId]];
         return
             string(
                 abi.encodePacked(baseURI, factionName, "/", _toString(tokenId))
+            );
+    }
+
+    function tokenStaticURI(uint256 tokenId)
+        private
+        view
+        returns (string memory)
+    {
+        string storage factionName = factionNames[tokenFaction[tokenId]];
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        abi.encodePacked(
+                            '{"name": "Remilio 64 # ',
+                            _toString(tokenId),
+                            '", "image": "',
+                            imgURI,
+                            _toString(tokenId),
+                            ".jpg",
+                            '",',
+                            '"attributes": [',
+                            '{"faction": "',
+                            factionName,
+                            '"',
+                            "}]}"
+                        )
+                    )
+                )
             );
     }
 
@@ -415,12 +507,12 @@ contract Remilio64 is ERC721A, Ownable {
     /// if players aren't minting.
     /// -------------------------------------
 
-    function getPrice() public view returns (uint256) {
-        return price;
+    function getPrice() public view returns (uint256[] memory) {
+        return priceTiers;
     }
 
-    function changePrice(uint256 _price) public onlyOwner {
-        price = _price;
+    function changePrice(uint256 index, uint256 _price) public onlyOwner {
+        priceTiers[index] = _price;
     }
 
     /// -------------------------------------
@@ -433,341 +525,5 @@ contract Remilio64 is ERC721A, Ownable {
 
     function setBaseURI(string memory _baseUri) public onlyOwner {
         baseURI = _baseUri;
-    }
-
-    /*
-
-    /// -------------------------------------
-    /// 🔫 Rem64 Wars
-    /// -------------------------------------
-
-    Premise: 
-    
-    - Each Remilio64 starts as ALIVE.
-
-    - Each Remilio64 starts with a bounty of 0.
-
-    - Each ALIVE Remilio64 can shoot someone with ether.
-
-    - MIN bullet cost is 0.0005Ξ FOR SANITY.
-
-    - IF an ALIVE Remilio64 (A) is shot by an ALIVE REMILIO (B):
-        - IF A's bounty is 0, it is DEAD. B's bounty increases
-        to X where X is the amount of ETHER B shot A with.
-
-        - IF A's bounty is not 0, A's bounty is subtracted by
-        X where X is the the amount of ETHER B shot A with and
-        added to B's bounty.
-            SO:
-            - B's bounty increases to 2X.
-            - IF A's new bounty is 0, it is DEAD.
-            - IF A's new bounty is >0, it is still ALIVE with
-            with old_bounty - X.
-
-        - These bounty changes reflected in the FACTION_BOUNTY
-
-        EVERYTIME A REMILIO KILLS ANOTHER REMILIO, IT'S KILL
-        COUNT WILL INCREASE BY 1. THIS IS SIMPLY A VANITY METRIC
-        BUT A COOL FLEX 💪.
-
-    - There is a CUTOFF datetime when the war ends.
-
-    AFTER THE CUT OFF DATE:
-
-    - Each faction's TOTAL_BOUNTY is calculated.
-
-    - The winning faction will consume the balances of every
-    other faction's TOTAL_BOUNTY, leaving it with a FINAL_BOUNTY.
-
-    - The 33% of the FINAL_BOUNTY is transferred to the dev team. 
-
-    - Each token in the winning faction's bounty, will serve as a
-    claim on the (FINAL_BOUNTY * 0.67), proportional to (TOTAL_BOUNTY/TOKEN_BOUNTY).
-
-    FIN.
-
-    INCENTIVES: 
-        - Killing Remilio's stimulates gameplay because a dead remilio can't shoot
-        and the holder would need to trade/buy a new one if they want to play.
-        - Killing Whale's has the same effect, incentivizes whales to re-enter.
-        - People will want to jump factions, this stimulates trading.
-        - People work together on a public strategy to kill particular factions.
-        - Drives community, creates a lot of engagement, bringing attention to
-        the project.
-        - EMERGENT METAS FROM COMMUNITY, WHO KNOWS WHAT THESE WILL BE.
-
-    NOTES:
-        - The WAR will open with a specific cutoff time and date. This will not
-          be modifiable. PERIOD. IT IS PROGRAMMED.
-        - NO NEW ACTIONS will be permitted after the CUTOFF DATE.
-        - CLAIMS will only be open after the CUTOFF DATE.
-        - DEV will ONLY be able to access 33% stake once CUT OFF DATE IS REACHED.
-        - Any funds in FINAL_BOUNTY will ONLY be accessible to Rem64 claims. Dev
-          can never access these. As such there's a chance some ether is locked away 
-          permanently from never be claimed.
-    */
-
-    /// -------------------------------------
-    /// ❌ Game Ownership Revoking
-    ///     true gentleman shit™️
-    /// -------------------------------------
-
-    bool gameOwnershipRevoked = false;
-
-    modifier gameOwnerRevoked() {
-        if (gameOwnershipRevoked == true) {
-            revert GameOwnerRevoked();
-        }
-        _;
-    }
-
-    // One way function, rip 🪦
-    function revokeGameOwnership() public onlyOwner {
-        gameOwnershipRevoked = true;
-    }
-
-    /// -------------------------------------
-    /// 😵 Alive Or Dead
-    /// -------------------------------------
-    mapping(uint256 => bool) public remAlive;
-
-    function getRemAlive(uint256 tokenId) public view returns (bool) {
-        return remAlive[tokenId];
-    }
-
-    // Owner override for killing Rem64, used for testing.
-    function killRem(uint256 tokenId) public onlyOwner gameOwnerRevoked {
-        remAlive[tokenId] = false;
-    }
-
-    // Function to kill Rem64 fr fr
-    function killRemFr(uint256 tokenId) private {
-        remAlive[tokenId] = false;
-    }
-
-    /// -------------------------------------
-    /// 💰 Bounties
-    /// -------------------------------------
-
-    // Token Bounty
-    mapping(uint256 => uint256) public remBounty;
-
-    // Faction Bounty
-    uint256[] public factionBounty = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    function getRemBounty(uint256 tokenId) public view returns (uint256) {
-        return remBounty[tokenId];
-    }
-
-    // Owner override for checking RemBounty, used for testing.
-    function changeRemBounty(uint256 tokenId, uint256 bounty)
-        public
-        onlyOwner
-        gameOwnerRevoked
-    {
-        remBounty[tokenId] = bounty;
-    }
-
-    /// -------------------------------------
-    /// 🔫 Shooting
-    /// -------------------------------------
-
-    event Shot(uint256 shotta, uint256 target, uint256 amount);
-
-    event Killed(uint256 shotta, uint256 target);
-
-    // REMI64 KILL COUNT VANITY METRIC
-    mapping(uint256 => uint256) public killCount;
-
-    // MODIFIERS FOR SHOOTING
-    modifier checkAlive(uint256 tokenId) {
-        if (remAlive[tokenId] == false) {
-            revert RemDead();
-        }
-        _;
-    }
-
-    modifier minShotPrice(uint256 shotPrice) {
-        if (shotPrice < 0.0005 ether) {
-            revert InvalidShotPrice();
-        }
-        _;
-    }
-
-    // Helper functions to add/subtract from Rem64 and
-    // associated faction.
-    function addToBounty(uint256 tokenId, uint256 bounty) private {
-        remBounty[tokenId] += bounty;
-        factionBounty[getFaction(tokenId)] += bounty;
-    }
-
-    function subFromBounty(uint256 tokenId, uint256 bounty) private {
-        remBounty[tokenId] -= bounty;
-        factionBounty[getFaction(tokenId)] -= bounty;
-    }
-
-    // REAL KILLAS 💧🩸 call this function
-    function shootRem(uint256 shotta, uint256 target)
-        public
-        payable
-        warOn
-        warNotOver
-        checkAlive(shotta)
-        checkAlive(target)
-        minShotPrice(msg.value)
-    {
-        uint256 shotPrice = msg.value;
-
-        FINAL_BOUNTY += shotPrice;
-
-        // Initial check to see if rem
-        // is instantly killed.
-        if (remBounty[target] == 0) {
-            killRemFr(target);
-            emit Killed(shotta, target);
-            addToBounty(shotta, shotPrice);
-            killCount[shotta] += 1;
-            return;
-        } else {
-            // Branch that deals with real
-            // killa logic.
-
-            // Check to make sure you aren't
-            // shooting more than the bounty
-            // you can collect. This is good
-            // guy 👮 code in case someone
-            // snipes your target, or you
-            // miscalculate.
-            if (remBounty[target] < shotPrice) {
-                revert PaidTooMuch();
-            }
-
-            // He's clapped 👏 but still moving.
-            if (remBounty[target] > shotPrice) {
-                subFromBounty(target, shotPrice);
-                addToBounty(shotta, shotPrice);
-                emit Shot(shotta, target, shotPrice);
-                return;
-            }
-
-            // Headshot 🎯
-            if (remBounty[target] == shotPrice) {
-                subFromBounty(target, shotPrice);
-                addToBounty(shotta, shotPrice);
-                killRemFr(target);
-                killCount[shotta] += 1;
-                emit Killed(shotta, target);
-                return;
-            }
-        }
-    }
-
-    /// -------------------------------------
-    /// 💣 WAR DECLARED
-    /// -------------------------------------
-
-    bool war = false;
-    uint256 startDate;
-    uint256 endDate;
-
-    modifier warOn() {
-        if (war == false) {
-            revert WarNotStarted();
-        }
-        _;
-    }
-
-    modifier warNotOver() {
-        if (war == true && block.timestamp > endDate) {
-            revert WarOver();
-        }
-        _;
-    }
-
-    modifier warOff() {
-        if (war == true) {
-            revert WarStarted();
-        }
-        _;
-    }
-
-    modifier warNeverStarted() {
-        if (endDate != 0) {
-            revert WarStarted();
-        }
-        _;
-    }
-
-    function startWar(uint256 endingDate)
-        public
-        onlyOwner
-        warOff
-        warNeverStarted
-    {
-        startDate = block.timestamp;
-        endDate = endingDate;
-        war = true;
-    }
-
-    /// -------------------------------------
-    /// 💣 WAR ENDED
-    /// -------------------------------------
-
-    // PUBLIC function anyone can call to end the
-    // war. BUT it has to be called after the
-    // official end date, and only if the war
-    // is still on going. Consider this a
-    // public service should dev team be unable
-    // to call off the war.
-
-    uint256 FINAL_BOUNTY;
-
-    function endWarOfficially() public warOn {
-        if (war == true && block.timestamp > endDate) {
-            war = false;
-        }
-    }
-
-    function withdrawDevWarProceeds() external onlyOwner warOff {
-        require(address(this).balance > 0, "Nothing to release");
-
-        uint256 withdrawAmount = ((FINAL_BOUNTY * 33) / 100);
-        (bool success, ) = payable(owner()).call{value: withdrawAmount}("");
-        FINAL_BOUNTY -= withdrawAmount;
-        require(success, "withdraw failed");
-    }
-
-    // Modifier to ensure token's faction
-    // won for a claim.
-    modifier tokenWon(uint256 tokenId) {
-        uint256 faction = getFaction(tokenId);
-        uint256 factionAmount = factionBounty[faction];
-
-        for (uint256 i = 0; i < factionBounty.length; i++) {
-            if (factionBounty[i] > factionAmount) {
-                revert("Faction didn't win");
-            }
-        }
-        _;
-    }
-
-    function soldierClaim(uint256 tokenId) public warOff tokenWon(tokenId) {
-        require(address(this).balance > 0, "Nothing to release");
-
-        uint256 faction = getFaction(tokenId);
-
-        uint256 facBounty = factionBounty[faction];
-
-        uint256 claimAmount = ((remBounty[tokenId] * 100) / facBounty);
-
-        uint256 withdrawAmount = ((FINAL_BOUNTY * claimAmount) / 100);
-
-        (bool success, ) = payable(address(msg.sender)).call{
-            value: withdrawAmount
-        }("");
-
-        FINAL_BOUNTY -= withdrawAmount;
-        remBounty[tokenId] = 0;
-        require(success, "withdraw failed");
     }
 }
