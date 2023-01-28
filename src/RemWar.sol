@@ -208,7 +208,7 @@ contract RemWar is Ownable {
     }
 
     modifier minShotPrice(uint256 shotPrice) {
-        if (shotPrice < 0.001 ether) {
+        if (shotPrice < 0.0005 ether) {
             revert InvalidShotPrice();
         }
         _;
@@ -226,6 +226,12 @@ contract RemWar is Ownable {
         factionBounty[Rem64.getFaction(tokenId)] -= bounty;
     }
 
+    // Helper function to add shooter to has shot list
+    // and increment faction shooter counter
+    mapping(uint256 => bool) public hasShot;
+
+    uint256[] factionShooters = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
     function shottaAdd(uint256 tokenId) private {
         if (hasShot[tokenId] = false) {
             hasShot[tokenId] = true;
@@ -233,11 +239,8 @@ contract RemWar is Ownable {
         }
     }
 
-    mapping(uint256 => bool) public hasShot;
-
-    uint256[] factionShooters = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-
     // REAL KILLAS 💧🩸 call this function
+    // TODO: add check friendly fire
     function shootRem(uint256 shotta, uint256 target)
         public
         payable
@@ -350,24 +353,24 @@ contract RemWar is Ownable {
     /// 💣 WAR ENDED
     /// -------------------------------------
 
+    // Variables to hold the paid totals for withdrawal;
+    uint256 public FINAL_BOUNTY;
+    uint256 public SHOOTER_BOUNTY;
+    uint256 public DEV_TOTAL;
+
     // PUBLIC function anyone can call to end the
     // war. BUT it has to be called after the
     // official end date, and only if the war
     // is still on going. Consider this a
     // public service should dev team be unable
     // to call off the war.
-
-    // Variables to hold the paid totals for withdrawal;
-    uint256 public FINAL_BOUNTY;
-    uint256 public SHOOTER_BOUNTY;
-    uint256 public DEV_TOTAL;
-
     function endWarOfficially() public warOn {
         if (war == true && block.timestamp > endDate) {
             war = false;
         }
     }
 
+    // WITHDRAW FOR DEV - 33%
     function withdrawDevWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
         (bool success, ) = payable(owner()).call{value: DEV_TOTAL}("");
@@ -388,7 +391,7 @@ contract RemWar is Ownable {
         _;
     }
 
-    mapping(uint256 => bool) public soldierClaimed;
+    // modifier for SHOOTER CLAIM - 10%
     mapping(uint256 => bool) public shooterClaimed;
 
     modifier shooterClaimedCheck(uint256 tokenId) {
@@ -398,6 +401,10 @@ contract RemWar is Ownable {
         _;
     }
 
+    // modifier for SOLDIER CLAIM
+    // FINAL BOUNTY * (FACTION BOUNTY/TOKEN BOUTNY)
+    mapping(uint256 => bool) public soldierClaimed;
+
     modifier soldierClaimedCheck(uint256 tokenId) {
         if (soldierClaimed[tokenId] == true) {
             revert("Soldier already claimed");
@@ -405,6 +412,7 @@ contract RemWar is Ownable {
         _;
     }
 
+    // Check to make sure caller owns the shooter to claim
     modifier shooterIsOwned(uint256 tokenId, address sender) {
         if (Rem64.ownerOf(tokenId) != sender) {
             revert("not owner of");
@@ -412,14 +420,16 @@ contract RemWar is Ownable {
         _;
     }
 
+    // Claim 10% for having fired a shot and being on the
+    // the winning faction
     function shooterClaim(uint256 tokenId)
         public
         tokenWon(tokenId)
         shooterClaimedCheck(tokenId)
         shooterIsOwned(tokenId, msg.sender)
     {
-        uint256 amount = factionShooters[Rem64.getFaction(tokenId)];
-        uint256 withdrawAmount = ((SHOOTER_BOUNTY * amount) / 100);
+        uint256 numberOfShooters = factionShooters[Rem64.getFaction(tokenId)];
+        uint256 withdrawAmount = ((SHOOTER_BOUNTY * numberOfShooters) / 100);
 
         (bool success, ) = payable(address(msg.sender)).call{
             value: withdrawAmount
@@ -429,6 +439,8 @@ contract RemWar is Ownable {
         require(success, "withdraw failed");
     }
 
+    // Claim the full bounty the shooter has accumulated
+    // throughout play
     function soldierClaim(uint256 tokenId)
         public
         warOff
