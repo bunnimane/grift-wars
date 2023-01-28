@@ -15,4 +15,6 @@ interface IRem64 {
         external
         view
         returns (string memory);
+
+    function ownerOf(uint256 tokenId) external view returns (address owner);
 }

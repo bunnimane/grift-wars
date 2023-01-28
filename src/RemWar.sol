@@ -24,7 +24,7 @@ error WarOver();
 contract RemWar is Ownable {
     /*
     /// -------------------------------------
-    /// 🔫 Rem64 Wars
+    /// 🔫 Grift Wars
     /// -------------------------------------
 
     Premise: 
@@ -76,8 +76,10 @@ contract RemWar is Ownable {
 
     - The 33% of the FINAL_BOUNTY is transferred to the dev team. 
 
+    - 10% will go to EVERY REM64 on the winning faction who shot someone.
+
     - Each token in the winning faction's bounty, will serve as a
-    claim on the (FINAL_BOUNTY * 0.67), proportional to (TOTAL_BOUNTY/TOKEN_BOUNTY).
+    claim on the (FINAL_BOUNTY * 0.57), proportional to (TOTAL_BOUNTY/TOKEN_BOUNTY).
 
     FIN.
 
@@ -222,6 +224,17 @@ contract RemWar is Ownable {
         factionBounty[Rem64.getFaction(tokenId)] -= bounty;
     }
 
+    function shottaAdd(uint256 tokenId) private {
+        if (hasShot[tokenId] = false) {
+            hasShot[tokenId] = true;
+            factionShooters[Rem64.getFaction(tokenId)];
+        }
+    }
+
+    mapping(uint256 => bool) public hasShot;
+
+    uint256[] factionShooters = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
     // REAL KILLAS 💧🩸 call this function
     function shootRem(uint256 shotta, uint256 target)
         public
@@ -235,7 +248,8 @@ contract RemWar is Ownable {
         uint256 shotPrice = msg.value;
 
         //Split payment
-        FINAL_BOUNTY += (shotPrice * 67) / 100;
+        FINAL_BOUNTY += (shotPrice * 57) / 100;
+        SHOOTER_BOUNTY += (shotPrice * 10) / 100;
         DEV_TOTAL += (shotPrice * 33) / 100;
 
         // Initial check to see if rem
@@ -245,6 +259,7 @@ contract RemWar is Ownable {
             emit Killed(shotta, target);
             addToBounty(shotta, shotPrice);
             killCount[shotta] += 1;
+            shottaAdd(shotta);
             return;
         } else {
             // Branch that deals with real
@@ -264,6 +279,7 @@ contract RemWar is Ownable {
             if (remBounty[target] > shotPrice) {
                 subFromBounty(target, shotPrice);
                 addToBounty(shotta, shotPrice);
+                shottaAdd(shotta);
                 emit Shot(shotta, target, shotPrice);
                 return;
             }
@@ -274,6 +290,7 @@ contract RemWar is Ownable {
                 addToBounty(shotta, shotPrice * 2);
                 killRemFr(target);
                 killCount[shotta] += 1;
+                shottaAdd(shotta);
                 emit Killed(shotta, target);
                 return;
             }
@@ -339,9 +356,9 @@ contract RemWar is Ownable {
     // to call off the war.
 
     // Variables to hold the paid totals for withdrawal;
-    uint256 FINAL_BOUNTY;
-
-    uint256 DEV_TOTAL;
+    uint256 public FINAL_BOUNTY;
+    uint256 public SHOOTER_BOUNTY;
+    uint256 public DEV_TOTAL;
 
     function endWarOfficially() public warOn {
         if (war == true && block.timestamp > endDate) {
@@ -370,6 +387,7 @@ contract RemWar is Ownable {
     }
 
     mapping(uint256 => bool) public soldierClaimed;
+    mapping(uint256 => bool) public shooterClaimed;
 
     modifier soldierClaimedCheck(uint256 tokenId) {
         if (soldierClaimed[tokenId] == true) {
@@ -378,11 +396,35 @@ contract RemWar is Ownable {
         _;
     }
 
+    modifier shooterIsOwned(uint256 tokenId, address sender) {
+        if (Rem64.ownerOf(tokenId) != sender) {
+            revert("not owner of");
+        }
+        _;
+    }
+
+    function shooterClaim(uint256 tokenId)
+        public
+        tokenWon(tokenId)
+        shooterIsOwned(tokenId, msg.sender)
+    {
+        uint256 amount = factionShooters[Rem64.getFaction(tokenId)];
+        uint256 withdrawAmount = ((SHOOTER_BOUNTY * amount) / 100);
+
+        (bool success, ) = payable(address(msg.sender)).call{
+            value: withdrawAmount
+        }("");
+
+        shooterClaimed[tokenId] = true;
+        require(success, "withdraw failed");
+    }
+
     function soldierClaim(uint256 tokenId)
         public
         warOff
         tokenWon(tokenId)
         soldierClaimedCheck(tokenId)
+        shooterIsOwned(tokenId, msg.sender)
     {
         require(address(this).balance > 0, "Nothing to release");
 
