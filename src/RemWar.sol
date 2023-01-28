@@ -53,8 +53,8 @@ contract RemWar is Ownable {
             with old_bounty - (X * (X/A's bounty)).
 
             NOTE: The reason behind the shot not just subtracting,
-            but instead subtracting a % is because 'whales' would 
-            be to susceptible to getting ganged up and there is 
+            but instead subtracting a percentage is because 'whales' would 
+            be to susceptible to getting ganged up on and there is 
             NO INCENTIVE for them. This makes it harder to take 
             down 'whales', but still provides value to higher
             valued shots. This seems to be most fair to me.
@@ -84,7 +84,9 @@ contract RemWar is Ownable {
     FIN.
 
     INCENTIVES: 
-        - Killing Remilio's stimulates gameplay because a dead remilio can't shoot and the holder would need to trade/buy a new one if they want to play.
+        - Because 10% of winnings is claimable by ANY shooters dead or alive on the
+        winning faction, it encourages people to make at the very least the min shot.
+        - Killing Remilio's stimulates gameplay because a dead remilio can't shoot and the holder would need to trade/buy a new one if they want to keep playing.
         - Killing Whale's has the same effect, incentivizes whales to re-enter.
         - People will want to jump factions, this stimulates trading.
         - People work together on a public strategy to kill particular factions.
@@ -389,6 +391,13 @@ contract RemWar is Ownable {
     mapping(uint256 => bool) public soldierClaimed;
     mapping(uint256 => bool) public shooterClaimed;
 
+    modifier shooterClaimedCheck(uint256 tokenId) {
+        if (shooterClaimed[tokenId] == true) {
+            revert("Soldier already claimed");
+        }
+        _;
+    }
+
     modifier soldierClaimedCheck(uint256 tokenId) {
         if (soldierClaimed[tokenId] == true) {
             revert("Soldier already claimed");
@@ -406,6 +415,7 @@ contract RemWar is Ownable {
     function shooterClaim(uint256 tokenId)
         public
         tokenWon(tokenId)
+        shooterClaimedCheck(tokenId)
         shooterIsOwned(tokenId, msg.sender)
     {
         uint256 amount = factionShooters[Rem64.getFaction(tokenId)];
