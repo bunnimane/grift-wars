@@ -214,6 +214,14 @@ contract RemWar is Ownable {
         _;
     }
 
+    // Check to make sure caller owns the shooter to claim
+    modifier shooterIsOwned(uint256 tokenId, address sender) {
+        if (Rem64.ownerOf(tokenId) != sender) {
+            revert("not owner of");
+        }
+        _;
+    }
+
     // Helper functions to add/subtract from Rem64 and
     // associated faction.
     function addToBounty(uint256 tokenId, uint256 bounty) private {
@@ -248,6 +256,7 @@ contract RemWar is Ownable {
         warNotOver
         checkAlive(shotta)
         checkAlive(target)
+        shooterIsOwned(shotta, msg.sender)
         minShotPrice(msg.value)
     {
         uint256 shotPrice = msg.value;
@@ -408,14 +417,6 @@ contract RemWar is Ownable {
     modifier soldierClaimedCheck(uint256 tokenId) {
         if (soldierClaimed[tokenId] == true) {
             revert("Soldier already claimed");
-        }
-        _;
-    }
-
-    // Check to make sure caller owns the shooter to claim
-    modifier shooterIsOwned(uint256 tokenId, address sender) {
-        if (Rem64.ownerOf(tokenId) != sender) {
-            revert("not owner of");
         }
         _;
     }
