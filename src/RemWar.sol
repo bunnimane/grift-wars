@@ -428,7 +428,7 @@ contract RemWar is Ownable {
     // Claim 10% for having fired a shot and being on the
     // the winning faction
 
-    // TODO: Reentrancy guard
+    // TODO: ⚠️⚠️ Reentrancy guard ⚠️⚠️
     function shooterClaim(uint256 tokenId)
         public
         tokenWon(tokenId)
@@ -462,7 +462,7 @@ contract RemWar is Ownable {
     // Claim the full bounty the shooter has accumulated
     // throughout play
 
-    // TODO: Reentrancy guard
+    // TODO: ⚠️⚠️ Reentrancy guard ⚠️⚠️
     function soldierClaim(uint256 tokenId)
         public
         warOff
