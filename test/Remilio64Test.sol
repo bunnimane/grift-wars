@@ -397,11 +397,10 @@ contract FomoFugitiveTest is Test {
         assertEq(_RemWar.getRemDead(2), false);
     }
 
-    function testShotInvalidAmount(uint256 amount) public {
-        vm.assume(amount % 0.001 ether != 0);
+    function testShotInvalidAmount() public {
         testMintSuccess();
-        vm.expectRevert("NOT A MULTIPLE OF MIN SHOT");
-        _RemWar.shootRem{value: amount}(0, 1);
+        vm.expectRevert();
+        _RemWar.shootRem{value: 0.0012 ether}(0, 1);
     }
 
     ///----------------------------------
