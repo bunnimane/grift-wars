@@ -378,6 +378,7 @@ contract RemWar is Ownable {
             war = false;
         }
     }
+    
 
     // WITHDRAW FOR DEV - 33%
     function withdrawDevWarProceeds() external onlyOwner warOff {
