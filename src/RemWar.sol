@@ -395,7 +395,33 @@ contract RemWar is Ownable {
     function endWarOfficially() public warOn {
         if (war == true && block.timestamp > endDate) {
             war = false;
+            determineWinningFaction();
         }
+    }
+
+    uint256 public winningFactionCount = 0;
+
+    function getWinningFactionCount() view public returns (uint256) {
+        return winningFactionCount;
+    }
+
+    function determineWinningFaction() private {
+        uint256 largest = 0; 
+        uint256 i;
+
+        for(i = 0; i < factionBounty.length; i++){
+            if(factionBounty[i] > largest) {
+                largest = factionBounty[i]; 
+            } 
+        }
+
+        for(i = 0; i < factionBounty.length; i++){
+            if(factionBounty[i] == largest) {
+                winningFactionCount += 1;
+            } 
+        }
+
+        FINAL_BOUNTY = Math.mulDiv(FINAL_BOUNTY, 1, winningFactionCount);
     }
 
 
@@ -461,6 +487,12 @@ contract RemWar is Ownable {
 
     // Claim the full bounty the shooter has accumulated
     // throughout play
+
+    function getPotentialWinnings(uint256 tokenId) view public returns (uint256){
+        uint256 faction = Rem64.getFaction(tokenId);
+        uint256 facBounty = factionBounty[faction];
+        return Math.mulDiv(FINAL_BOUNTY, remBounty[tokenId],facBounty);
+    }
 
     // TODO: ⚠️⚠️ Reentrancy guard ⚠️⚠️
     function soldierClaim(uint256 tokenId)
