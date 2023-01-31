@@ -270,10 +270,10 @@ contract RemWar is Ownable {
         // is instantly killed.
         if (remBounty[target] == 0) {
             killRemFr(target);
-            emit Killed(shotta, target);
             addToBounty(shotta, shotPrice);
             killCount[shotta] += 1;
             shottaAdd(shotta);
+            emit Killed(shotta, target);
             return;
         } else {
             // Branch that deals with real
