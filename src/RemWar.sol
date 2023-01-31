@@ -422,6 +422,7 @@ contract RemWar is Ownable {
         }
 
         FINAL_BOUNTY = Math.mulDiv(FINAL_BOUNTY, 1, winningFactionCount);
+        SHOOTER_BOUNTY = Math.mulDiv(SHOOTER_BOUNTY, 1, winningFactionCount);
     }
 
 
