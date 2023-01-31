@@ -5,6 +5,7 @@ import "../lib/forge-std/src/Test.sol";
 import "../src/Remilio64.sol";
 import "../src/RemWar.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract FomoFugitiveTest is Test {
     Remilio64 _Remilio64;
@@ -28,8 +29,8 @@ contract FomoFugitiveTest is Test {
         price = 0.005 ether;
         _Remilio64 = new Remilio64();
         _RemWar = new RemWar(address(_Remilio64));
-        vm.deal(_RemWar.owner(), 300 ether);
-        vm.deal(_Remilio64.owner(), 300 ether);
+        vm.deal(_RemWar.owner(), 20000 ether);
+        vm.deal(_Remilio64.owner(), 20000 ether);
         string
             memory mnemonic = "test test test test test test test test test test test junk";
         uint256 privateKey = vm.deriveKey(mnemonic, 0);
@@ -305,16 +306,19 @@ contract FomoFugitiveTest is Test {
         assertEq(_RemWar.getFactionBounty(faction), 0.001 ether);
     }
 
-    function testRemKillWithBounty() public {
-        ///vm.assume(shotAmount < 1000 ether && shotAmount >= 0.001 ether);
+
+    ///----------------------------------
+    /// STATIC SHOT TESTS 🔫
+    ///----------------------------------
+
+    function testHeadShotWithBounty() public {
         uint256 shotAmount = 0.001 ether;
-        testMintSuccess();
+        testMintOverflow();
         _RemWar.startWar(block.timestamp + 382738273834734);
         _RemWar.shootRem{value: shotAmount}(0, 1);
         _RemWar.shootRem{value: shotAmount}(2, 0);
         assertEq(_RemWar.getRemBounty(0), 0 ether);
         assertEq(_RemWar.getRemBounty(1), 0 ether);
-        assertEq(_RemWar.getRemBounty(2), shotAmount * 2);
         assertEq(_RemWar.getRemDead(1), true);
         assertEq(_RemWar.getRemDead(0), true);
         assertEq(_RemWar.getRemDead(2), false);
@@ -322,5 +326,129 @@ contract FomoFugitiveTest is Test {
         uint256 faction2 = _Remilio64.getFaction(0);
         assertEq(_RemWar.getFactionBounty(faction1), shotAmount * 2);
         assertEq(_RemWar.getFactionBounty(faction2), 0 ether);
+    }
+
+    function testShotNotKill() public {
+        // Mint tokens
+        testMintOverflow();
+        
+        // Start war
+        _RemWar.startWar(block.timestamp + 382738273834734);
+
+        // Take shots, 0->1, 2->0
+        _RemWar.shootRem{value: 0.1 ether}(0, 1);
+        _RemWar.shootRem{value: 0.05 ether}(2, 0);
+
+        // Check shotee bounty and faction bounty
+        assertEq(_RemWar.getRemBounty(0), 0.075 ether);
+        uint256 faction2 = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction2), 0.075 ether);
+
+        // Check shotta bounty and faction bounty
+        assertEq(_RemWar.getRemBounty(2), 0.075 ether);
+        uint256 faction1 = _Remilio64.getFaction(2);
+        assertEq(_RemWar.getFactionBounty(faction1), 0.075 ether);
+
+        // Random dead checks
+        assertEq(_RemWar.getRemDead(0), false);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(2), false);
+    }
+
+    function testShotNotKillNotRound() public {
+        // Mint tokens
+        testMintOverflow();
+        
+        // Start war
+        _RemWar.startWar(block.timestamp + 382738273834734);
+
+        // Take shots, 0->1, 2->0
+        _RemWar.shootRem{value: 0.33 ether}(0, 1);
+        _RemWar.shootRem{value: 0.1 ether}(2, 0);
+
+        //console.logUint(_RemWar.getRemBounty(0));
+        //console.logUint(_RemWar.getRemBounty(2));
+
+        // Check shotee bounty and faction bounty
+        assertEq(_RemWar.getRemBounty(0), 299696969696969697);
+        uint256 faction2 = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction2), 299696969696969697);
+
+        // Check shotta bounty and faction bounty
+        
+        assertEq(_RemWar.getRemBounty(2), 130303030303030303);
+        uint256 faction1 = _Remilio64.getFaction(2);
+        assertEq(_RemWar.getFactionBounty(faction1), 130303030303030303);
+
+        // Random dead checks
+        assertEq(_RemWar.getRemDead(0), false);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(2), false);
+    }
+
+    ///----------------------------------
+    /// FUZZ SHOT TESTS 🔫
+    ///----------------------------------
+
+    function testHeadShotWithBountyFuzz(uint256 shotMult) public {
+        vm.assume(shotMult < 20000000);
+        vm.assume(shotMult > 0);
+        uint256 shot = 0.001 ether * shotMult;
+        testMintOverflow();
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        _RemWar.shootRem{value: shot}(0, 1);
+        _RemWar.shootRem{value: shot}(2, 0);
+        assertEq(_RemWar.getRemBounty(0), 0 ether);
+        assertEq(_RemWar.getRemBounty(1), 0 ether);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(0), true);
+        assertEq(_RemWar.getRemDead(2), false);
+        uint256 faction1 = _Remilio64.getFaction(2);
+        uint256 faction2 = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction1), shot * 2);
+        assertEq(_RemWar.getFactionBounty(faction2), 0 ether);
+    }
+
+    function testShotNotKillNotRound(uint256 a, uint256 b) public {
+        vm.assume(a < 20000000);
+        vm.assume(a > 0);
+        vm.assume(b < 20000000);
+        vm.assume(b > 0);
+
+        vm.assume(b < a);
+
+        uint256 shot1 = 0.001 ether * a;
+        uint256 shot2 = 0.001 ether * b;
+
+        // Mint tokens
+        testMintOverflow();
+        
+        // Start war
+        _RemWar.startWar(block.timestamp + 382738273834734);
+
+        // Take shots, 0->1, 2->0
+        _RemWar.shootRem{value: shot1}(0, 1);
+        _RemWar.shootRem{value: shot2}(2, 0);
+
+        //console.logUint(_RemWar.getRemBounty(0));
+        //console.logUint(_RemWar.getRemBounty(2));
+
+        // Check shotee bounty and faction bounty
+        uint256 damage =  Math.mulDiv(shot2, shot2, shot1);
+
+        assertEq(_RemWar.getRemBounty(0), shot1 - damage );
+        uint256 faction2 = _Remilio64.getFaction(0);
+        assertEq(_RemWar.getFactionBounty(faction2), shot1 - damage);
+
+        // Check shotta bounty and faction bounty
+        
+        assertEq(_RemWar.getRemBounty(2), shot2 + damage);
+        uint256 faction1 = _Remilio64.getFaction(2);
+        assertEq(_RemWar.getFactionBounty(faction1), shot2 + damage);
+
+        // Random dead checks
+        assertEq(_RemWar.getRemDead(0), false);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(2), false);
     }
 }

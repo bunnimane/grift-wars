@@ -211,7 +211,7 @@ contract RemWar is Ownable {
     }
 
     modifier minShotPrice(uint256 shotPrice) {
-        if (shotPrice < 0.0005 ether) {
+        if (shotPrice < 0.001 ether) {
             revert InvalidShotPrice();
         }
         _;
@@ -237,10 +237,11 @@ contract RemWar is Ownable {
         factionBounty[Rem64.getFaction(tokenId)] -= bounty;
     }
 
-    function subFromBountyNotDead(uint256 tokenId, uint256 bounty) private {
-        uint256 newBounty = remBounty[tokenId] - (bounty * (bounty / remBounty[tokenId] ));
-        factionBounty[Rem64.getFaction(tokenId)] -= bounty;
-        remBounty[tokenId] = newBounty;
+    function subFromBountyNotDead(uint256 tokenId, uint256 bounty) private returns (uint256) {
+        uint256 damage = Math.mulDiv(bounty, bounty, remBounty[tokenId]);
+        remBounty[tokenId] -= damage;
+        factionBounty[Rem64.getFaction(tokenId)] -= damage;
+        return damage;
     }
 
     // Helper function to add shooter to has shot list
@@ -268,12 +269,13 @@ contract RemWar is Ownable {
         shooterIsOwned(shotta, msg.sender)
         minShotPrice(msg.value)
     {
+        require((msg.value % 0.001 ether) == 0, "NOT A MULTIPLE OF MIN SHOT");
         uint256 shotPrice = msg.value;
 
         //Split payment
-        FINAL_BOUNTY += (shotPrice * 57) / 100;
-        SHOOTER_BOUNTY += (shotPrice * 10) / 100;
-        DEV_TOTAL += (shotPrice * 33) / 100;
+        FINAL_BOUNTY += Math.mulDiv(shotPrice, 57, 100);
+        SHOOTER_BOUNTY += Math.mulDiv(shotPrice, 10, 100);
+        DEV_TOTAL += Math.mulDiv(shotPrice, 33, 100);
 
         // Initial check to see if rem
         // is instantly killed.
@@ -300,8 +302,8 @@ contract RemWar is Ownable {
 
             // He's clapped 👏 but still moving.
             if (remBounty[target] > shotPrice) {
-                subFromBountyNotDead(target, shotPrice);
-                addToBounty(shotta, shotPrice);
+                uint256 damage = subFromBountyNotDead(target, shotPrice);
+                addToBounty(shotta, shotPrice + damage);
                 shottaAdd(shotta);
                 emit Shot(shotta, target, shotPrice);
                 return;
@@ -450,7 +452,7 @@ contract RemWar is Ownable {
         }
         _;
     }
-    
+
     // Claim the full bounty the shooter has accumulated
     // throughout play
     function soldierClaim(uint256 tokenId)
