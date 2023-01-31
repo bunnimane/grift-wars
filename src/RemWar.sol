@@ -4,6 +4,8 @@
 pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 import "./IRem64.sol";
 
 // Game Ownership
@@ -116,6 +118,7 @@ contract RemWar is Ownable {
 
     // Initialization and constructor
     IRem64 Rem64;
+    using SafeMath for uint256;
 
     constructor(address rem64Address) {
         Rem64 = IRem64(rem64Address);
@@ -234,6 +237,12 @@ contract RemWar is Ownable {
         factionBounty[Rem64.getFaction(tokenId)] -= bounty;
     }
 
+    function subFromBountyNotDead(uint256 tokenId, uint256 bounty) private {
+        uint256 newBounty = remBounty[tokenId] - (bounty * (bounty / remBounty[tokenId] ));
+        factionBounty[Rem64.getFaction(tokenId)] -= bounty;
+        remBounty[tokenId] = newBounty;
+    }
+
     // Helper function to add shooter to has shot list
     // and increment faction shooter counter
     mapping(uint256 => bool) public hasShot;
@@ -243,7 +252,7 @@ contract RemWar is Ownable {
     function shottaAdd(uint256 tokenId) private {
         if (hasShot[tokenId] = false) {
             hasShot[tokenId] = true;
-            factionShooters[Rem64.getFaction(tokenId)];
+            factionShooters[Rem64.getFaction(tokenId)] += 1;
         }
     }
 
@@ -291,7 +300,7 @@ contract RemWar is Ownable {
 
             // He's clapped 👏 but still moving.
             if (remBounty[target] > shotPrice) {
-                subFromBounty(target, shotPrice);
+                subFromBountyNotDead(target, shotPrice);
                 addToBounty(shotta, shotPrice);
                 shottaAdd(shotta);
                 emit Shot(shotta, target, shotPrice);
@@ -378,7 +387,7 @@ contract RemWar is Ownable {
             war = false;
         }
     }
-    
+
 
     // WITHDRAW FOR DEV - 33%
     function withdrawDevWarProceeds() external onlyOwner warOff {
@@ -411,16 +420,6 @@ contract RemWar is Ownable {
         _;
     }
 
-    // modifier for SOLDIER CLAIM
-    // FINAL BOUNTY * (FACTION BOUNTY/TOKEN BOUTNY)
-    mapping(uint256 => bool) public soldierClaimed;
-
-    modifier soldierClaimedCheck(uint256 tokenId) {
-        if (soldierClaimed[tokenId] == true) {
-            revert("Soldier already claimed");
-        }
-        _;
-    }
 
     // Claim 10% for having fired a shot and being on the
     // the winning faction
@@ -441,6 +440,17 @@ contract RemWar is Ownable {
         require(success, "withdraw failed");
     }
 
+    // modifier for SOLDIER CLAIM
+    // FINAL BOUNTY * (FACTION BOUNTY/TOKEN BOUTNY)
+    mapping(uint256 => bool) public soldierClaimed;
+
+    modifier soldierClaimedCheck(uint256 tokenId) {
+        if (soldierClaimed[tokenId] == true) {
+            revert("Soldier already claimed");
+        }
+        _;
+    }
+    
     // Claim the full bounty the shooter has accumulated
     // throughout play
     function soldierClaim(uint256 tokenId)
