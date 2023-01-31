@@ -14,6 +14,9 @@ error TestModeOff();
 // Rem alive status
 error RemDead();
 
+// Friendly Fire
+error NoFriendlyFire();
+
 // Shot Price Checker
 error InvalidShotPrice();
 error PaidTooMuch();
@@ -225,6 +228,13 @@ contract RemWar is Ownable {
         _;
     }
 
+    modifier checkFriendlyFire(uint256 shotta, uint256 target) {
+        if (Rem64.getFaction(shotta) == Rem64.getFaction(target)) {
+            revert NoFriendlyFire();
+        }
+        _;
+    }
+
     // Helper functions to add/subtract from Rem64 and
     // associated faction.
     function addToBounty(uint256 tokenId, uint256 bounty) private {
@@ -251,14 +261,11 @@ contract RemWar is Ownable {
     uint256[] factionShooters = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     function shottaAdd(uint256 tokenId) private {
-        if (hasShot[tokenId] = false) {
-            hasShot[tokenId] = true;
-            factionShooters[Rem64.getFaction(tokenId)] += 1;
-        }
+        hasShot[tokenId] = true;
+        factionShooters[Rem64.getFaction(tokenId)] += 1;
     }
 
     // REAL KILLAS 💧🩸 call this function
-    // TODO: add check friendly fire
     function shootRem(uint256 shotta, uint256 target)
         public
         payable
@@ -267,6 +274,7 @@ contract RemWar is Ownable {
         checkAlive(shotta)
         checkAlive(target)
         shooterIsOwned(shotta, msg.sender)
+        checkFriendlyFire(shotta, target)
         minShotPrice(msg.value)
     {
         require((msg.value % 0.001 ether) == 0, "NOT A MULTIPLE OF MIN SHOT");
@@ -394,7 +402,9 @@ contract RemWar is Ownable {
     // WITHDRAW FOR DEV - 33%
     function withdrawDevWarProceeds() external onlyOwner warOff {
         require(address(this).balance > 0, "Nothing to release");
+        require(DEV_TOTAL > 0, "Already Claimed");
         (bool success, ) = payable(owner()).call{value: DEV_TOTAL}("");
+        DEV_TOTAL = 0;
         require(success, "withdraw failed");
     }
 
@@ -415,24 +425,18 @@ contract RemWar is Ownable {
     // modifier for SHOOTER CLAIM - 10%
     mapping(uint256 => bool) public shooterClaimed;
 
-    modifier shooterClaimedCheck(uint256 tokenId) {
-        if (shooterClaimed[tokenId] == true) {
-            revert("Soldier already claimed");
-        }
-        _;
-    }
-
-
     // Claim 10% for having fired a shot and being on the
     // the winning faction
     function shooterClaim(uint256 tokenId)
         public
         tokenWon(tokenId)
-        shooterClaimedCheck(tokenId)
         shooterIsOwned(tokenId, msg.sender)
     {
+        require(hasShot[tokenId] == true, "Shooter never shot");
+        require(shooterClaimed[tokenId] == false, "Already Claimed");
+
         uint256 numberOfShooters = factionShooters[Rem64.getFaction(tokenId)];
-        uint256 withdrawAmount = ((SHOOTER_BOUNTY * numberOfShooters) / 100);
+        uint256 withdrawAmount = Math.mulDiv(SHOOTER_BOUNTY, 1, numberOfShooters);
 
         (bool success, ) = payable(address(msg.sender)).call{
             value: withdrawAmount
@@ -459,6 +463,7 @@ contract RemWar is Ownable {
         public
         warOff
         tokenWon(tokenId)
+        checkAlive(tokenId)
         soldierClaimedCheck(tokenId)
         shooterIsOwned(tokenId, msg.sender)
     {
@@ -468,9 +473,7 @@ contract RemWar is Ownable {
 
         uint256 facBounty = factionBounty[faction];
 
-        uint256 claimAmount = ((remBounty[tokenId] * 100) / facBounty);
-
-        uint256 withdrawAmount = ((FINAL_BOUNTY * claimAmount) / 100);
+        uint256 withdrawAmount = Math.mulDiv(FINAL_BOUNTY, remBounty[tokenId],facBounty);
 
         (bool success, ) = payable(address(msg.sender)).call{
             value: withdrawAmount

@@ -29,8 +29,8 @@ contract FomoFugitiveTest is Test {
         price = 0.005 ether;
         _Remilio64 = new Remilio64();
         _RemWar = new RemWar(address(_Remilio64));
-        vm.deal(_RemWar.owner(), 20000 ether);
-        vm.deal(_Remilio64.owner(), 20000 ether);
+        vm.deal(_RemWar.owner(), 200000 ether);
+        vm.deal(_Remilio64.owner(), 200000 ether);
         string
             memory mnemonic = "test test test test test test test test test test test junk";
         uint256 privateKey = vm.deriveKey(mnemonic, 0);
@@ -45,7 +45,7 @@ contract FomoFugitiveTest is Test {
     /// -----------------------------------------------------------------------
 
     function testMintSuccess() public {
-        uint256 quantity = 2;
+        uint256 quantity = 4;
         _Remilio64.mint{value: 0.002 ether * quantity}(quantity);
         assertEq(address(_Remilio64).balance, 0.002 ether * quantity);
         assertEq(_Remilio64.balanceOf(address(this)), quantity);
@@ -306,6 +306,17 @@ contract FomoFugitiveTest is Test {
         assertEq(_RemWar.getFactionBounty(faction), 0.001 ether);
     }
 
+    ///----------------------------------
+    /// SHOT GAS TESTS 🔫
+    ///----------------------------------
+    function testKillNaked() public {
+        uint256 shotAmount = 0.001 ether;
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        testMintSuccess();
+        _RemWar.shootRem{value: shotAmount}(0, 1);
+        assertEq(_RemWar.getRemDead(1), true);
+        assertEq(_RemWar.getRemDead(0), false);
+    }
 
     ///----------------------------------
     /// STATIC SHOT TESTS 🔫
@@ -450,5 +461,146 @@ contract FomoFugitiveTest is Test {
         assertEq(_RemWar.getRemDead(0), false);
         assertEq(_RemWar.getRemDead(1), true);
         assertEq(_RemWar.getRemDead(2), false);
+    }
+
+    ///----------------------------------
+    /// FRIENDLY FIRE TEST 🔫
+    ///----------------------------------
+
+    function testFriendlyFire() public {
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        testMintOverflow();
+        uint256 faction1 = _Remilio64.getFaction(0);
+
+        uint256 secondToken;
+
+        for (uint256 i = 0; i < 9999; ++i) {
+            if (_Remilio64.getFaction(i) == faction1) {
+                secondToken = i;
+                break;
+            }
+        }
+
+        vm.expectRevert(NoFriendlyFire.selector);
+        _RemWar.shootRem(secondToken, 0);
+    }
+
+    ///----------------------------------
+    /// WITHDRAWAL TESTS 🔫
+    ///----------------------------------
+
+    ///----------------------------------
+    /// DEV WITHDRAWL 🔫
+    ///----------------------------------
+
+    function testDevWithdrawl() public {
+        testShotNotKillNotRound();
+        // 0.43 total ether in contract
+        uint256 oldBalance = address(this).balance;
+        uint256 contractBalance = address(_RemWar).balance;
+
+        vm.warp(block.timestamp + 782738273834739);
+        _RemWar.endWarOfficially();
+        _RemWar.withdrawDevWarProceeds();
+        uint256 newBalance = address(this).balance;
+
+        uint256 difference = newBalance - oldBalance;
+        assertEq(difference, 0.1419 ether);
+        assertEq(difference, Math.mulDiv(contractBalance, 33, 100));
+    }
+
+    // Dev double withdrawl
+    function testDevDoubleWithdrawl() public {
+        testDevWithdrawl();
+        vm.expectRevert("Already Claimed");
+        _RemWar.withdrawDevWarProceeds();
+
+    }
+
+    ///----------------------------------
+    /// SHOOTER WITHDRAWL
+    ///----------------------------------
+
+    // Test withdrawing shooter withdrawal
+    function testShooterWithdrawal() public {
+        testShotNotKillNotRound();
+        // 0.43 total ether in contract
+        uint256 oldBalance = address(this).balance;
+
+        vm.warp(block.timestamp + 782738273834739);
+        _RemWar.endWarOfficially();
+        _RemWar.shooterClaim(0);
+        uint256 newBalance = address(this).balance;
+
+        uint256 difference = newBalance - oldBalance;
+        assertEq(difference, 0.043 ether);
+    }
+
+    function testShooterDoubleClaim() public {
+        testShooterWithdrawal();
+        vm.expectRevert("Already Claimed");
+        _RemWar.shooterClaim(0);
+
+    }
+
+    // Test withdrawing losing faction
+    function testLosingShooterWithdrawl() public {
+        testShotNotKillNotRound();
+
+        vm.warp(block.timestamp + 782738273834739);
+        _RemWar.endWarOfficially();
+        vm.expectRevert("Faction didn't win");
+        _RemWar.shooterClaim(2);
+    }
+
+    ///----------------------------------
+    /// SOLDIER WITHDRAWL
+    ///----------------------------------
+
+    // Soldier single claim
+    function testSoldierWithdrawal() public {
+        testShotNotKillNotRound();
+        // 0.43 total ether in contract
+        uint256 oldBalance = address(this).balance;
+
+        vm.warp(block.timestamp + 782738273834739);
+        _RemWar.endWarOfficially();
+        _RemWar.soldierClaim(0);
+        uint256 newBalance = address(this).balance;
+
+        uint256 difference = newBalance - oldBalance;
+        assertEq(difference, 0.2451 ether);
+    }
+
+    // Soldier double claim
+    function testSoldierDoubleClaim() public {
+        testSoldierWithdrawal();
+        vm.expectRevert("Soldier already claimed");
+        _RemWar.soldierClaim(0);
+    }
+
+    function testSoldierDidntWin() public {
+        testShotNotKillNotRound();
+        vm.warp(block.timestamp + 782738273834739);
+        _RemWar.endWarOfficially();
+        vm.expectRevert("Faction didn't win");
+        _RemWar.soldierClaim(2);
+    }
+
+    ///----------------------------------
+    /// TOTAL WITHDRAWL
+    ///----------------------------------
+
+    function testTotalWithdrawl() public {
+        testShotNotKillNotRound();        
+
+        vm.warp(block.timestamp + 782738273834739);
+        _RemWar.endWarOfficially();
+        _RemWar.withdrawDevWarProceeds();
+        _RemWar.soldierClaim(0);
+        _RemWar.shooterClaim(0);
+        uint256 contractBalance = address(_RemWar).balance;
+
+        assertEq(contractBalance, 0 ether);
     }
 }
