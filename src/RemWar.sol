@@ -6,6 +6,7 @@ pragma solidity ^0.8.12;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./IRem64.sol";
 
 // Game Ownership
@@ -26,7 +27,7 @@ error WarNotStarted();
 error WarStarted();
 error WarOver();
 
-contract RemWar is Ownable {
+contract RemWar is Ownable, ReentrancyGuard {
     /*
     /// -------------------------------------
     /// 🔫 Grift Wars
@@ -455,11 +456,11 @@ contract RemWar is Ownable {
     // Claim 10% for having fired a shot and being on the
     // the winning faction
 
-    // TODO: ⚠️⚠️ Reentrancy guard ⚠️⚠️
     function shooterClaim(uint256 tokenId)
         public
         tokenWon(tokenId)
         shooterIsOwned(tokenId, msg.sender)
+        nonReentrant
     {
         require(hasShot[tokenId] == true, "Shooter never shot");
         require(shooterClaimed[tokenId] == false, "Already Claimed");
@@ -495,7 +496,6 @@ contract RemWar is Ownable {
         return Math.mulDiv(FINAL_BOUNTY, remBounty[tokenId],facBounty);
     }
 
-    // TODO: ⚠️⚠️ Reentrancy guard ⚠️⚠️
     function soldierClaim(uint256 tokenId)
         public
         warOff
@@ -503,6 +503,7 @@ contract RemWar is Ownable {
         checkAlive(tokenId)
         soldierClaimedCheck(tokenId)
         shooterIsOwned(tokenId, msg.sender)
+        nonReentrant
     {
         require(address(this).balance > 0, "Nothing to release");
 
