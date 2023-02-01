@@ -339,6 +339,10 @@ contract RemWar is Ownable, ReentrancyGuard {
     uint256 startDate;
     uint256 endDate;
 
+    function getWarStatus() view public returns (bool) {
+        return war;
+    }
+
     modifier warOn() {
         if (war == false) {
             revert WarNotStarted();
@@ -458,12 +462,13 @@ contract RemWar is Ownable, ReentrancyGuard {
 
     function shooterClaim(uint256 tokenId)
         public
+        warOff
         tokenWon(tokenId)
         shooterIsOwned(tokenId, msg.sender)
         nonReentrant
     {
         require(hasShot[tokenId] == true, "Shooter never shot");
-        require(shooterClaimed[tokenId] == false, "Already Claimed");
+        require(shooterClaimed[tokenId] != true, "Already Claimed");
 
         uint256 numberOfShooters = factionShooters[Rem64.getFaction(tokenId)];
         uint256 withdrawAmount = Math.mulDiv(SHOOTER_BOUNTY, 1, numberOfShooters);

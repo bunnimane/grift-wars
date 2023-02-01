@@ -549,6 +549,12 @@ contract FomoFugitiveTest is Test {
 
     }
 
+    function testShooterClaimWarOn() public {
+        testShotNotKillNotRound();
+        vm.expectRevert(WarStarted.selector);
+        _RemWar.shooterClaim(0);
+    }
+
     // Test withdrawing losing faction
     function testLosingShooterWithdrawl() public {
         testShotNotKillNotRound();
@@ -576,6 +582,12 @@ contract FomoFugitiveTest is Test {
 
         uint256 difference = newBalance - oldBalance;
         assertEq(difference, 0.2451 ether);
+    }
+
+    function testSoldierClaimWarOn() public {
+        testShotNotKillNotRound();
+        vm.expectRevert(WarStarted.selector);
+        _RemWar.soldierClaim(0);
     }
 
     // Soldier double claim
@@ -681,5 +693,24 @@ contract FomoFugitiveTest is Test {
         vm.prank(someUser);
         vm.expectRevert("not owner of");
         _RemWar.shooterClaim(0);
+    }
+
+    ///----------------------------------
+    /// Test War Status
+    ///----------------------------------
+
+    function testWarOn() public {
+        assertEq(_RemWar.getWarStatus(), false);
+
+        _RemWar.startWar(block.timestamp + 382738273834734);
+        assertEq(_RemWar.getWarStatus(), true);
+    }
+
+    function testWarOff() public {
+        testWarOn();
+        vm.warp(block.timestamp + 382738273834735);
+        _RemWar.endWarOfficially();
+
+        assertEq(_RemWar.getWarStatus(), false);
     }
 }
